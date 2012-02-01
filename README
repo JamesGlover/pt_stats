@@ -1,0 +1,17 @@
+pt_STATS
+--------
+
+pt_STATS is a simple story tracking system for Pivotal Tracker.
+The system is designed for Heroku deployment.
+
+SETUP
+--------
+
+The key config variables are located in web.rb
+
+$PROJECT_ID = The ID of the PT project to be tracked
+$PROJECT_NAME = The project name: Displayed on the tracking screen
+$ITERATION_LENGTH = The Iteration length in weeks
+$API_TOKEN = The API token
+$TEST_TICKET_ID = Required to test API links
+$TEST_TICKET_NAME = The name corresponding to the test ticket

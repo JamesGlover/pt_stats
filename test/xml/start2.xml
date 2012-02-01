@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">156782299</id>
+  <version type="integer">11</version>
+  <event_type>story_update</event_type>
+  <occurred_at type="datetime">2012/02/01 14:56:37 UTC</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover edited &quot;New Story&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">2</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24235441</url>
+      <estimate type="integer">2</estimate>
+      <current_state>started</current_state>
+    </story>
+  </stories>
+</activity>

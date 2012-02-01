@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">156710515</id>
+  <version type="integer">5</version>
+  <event_type>note_create</event_type>
+  <occurred_at type="datetime">2012/02/01 11:21:35 UTC</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover added comment: &quot;If I add a comment, will we have problems?&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">1</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+      <notes type="array">
+        <note>
+          <id type="integer">14389611</id>
+          <text>If I add a comment, will we have problems?</text>
+        </note>
+      </notes>
+    </story>
+  </stories>
+</activity>

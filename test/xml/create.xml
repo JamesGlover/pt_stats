@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+ <id type="integer">1</id>
+ <version type="integer">2</version>
+ <event_type>story_create</event_type>
+ <occurred_at type="datetime">2012/01/31 13:37:51 UTC</occurred_at>
+ <author>James Glover</author>
+ <project_id type="integer">466613</project_id>
+ <description>James Glover added &quot;Study the progress of a ticket through the system&quot;</description>
+ <stories type="array">
+   <story>
+     <id type="integer">1</id>
+     <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+     <name>Study the progress of a ticket through the system</name>
+     <story_type>chore</story_type>
+     <description>A ticket that will both be tracked, and fulfill its role at the end of the tracking.</description>
+     <current_state>unscheduled</current_state>
+     <owned_by>James Glover</owned_by>
+     <requested_by>James Glover</requested_by>
+   </story>
+ </stories>
+</activity>

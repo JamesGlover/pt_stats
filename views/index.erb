@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+  <head>
+    <title>Project Tracker: <%= $PROJECT_NAME %></title>
+  </head>
+  <body>
+    <h1><%= $PROJECT_NAME %></h1>
+    <table>
+      <tr>
+        <th>Created / Rejected</th>
+        <th>Started</th>
+        <th>Finished</th>
+        <th>Delivered</th>
+        <th>Accepted</th>
+        <th>Total</th>
+      </tr>
+      <tr>
+        <td id="project_created"><%= project_created %></td>
+        <td id="project_started"><%= project_started %></td>
+        <td id="project_finished"><%= project_finished %></td>
+        <td id="project_delivered"><%= project_delivered %></td>
+        <td id="project_accepted"><%= project_accepted %></td>
+        <td id="project_total"><%= project_total %></td>
+      </tr>
+      <tr></tr>
+    </table>
+  </body>
+</html>
