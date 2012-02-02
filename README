@@ -7,11 +7,13 @@ The system is designed for Heroku deployment.
 SETUP
 --------
 
-The key config variables are located in web.rb
+The key config variables are located in config.yml
 
-$PROJECT_ID = The ID of the PT project to be tracked
-$PROJECT_NAME = The project name: Displayed on the tracking screen
-$ITERATION_LENGTH = The Iteration length in weeks
-$API_TOKEN = The API token
-$TEST_TICKET_ID = Required to test API links
-$TEST_TICKET_NAME = The name corresponding to the test ticket
+project_id = The ID of the PT project to be tracked
+project_name = The project name: Displayed on the tracking screen
+iteration_length = The Iteration length in weeks
+api_token = the api token
+test_ticket_id = required to test api links
+test_ticket_name = the name corresponding to the test ticket
+username = the username for access
+password = the password for access

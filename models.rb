@@ -1,12 +1,12 @@
 require 'active_record'
+require 'yaml'
 
-RACK_ENV = 'test'
-
-ActiveRecord::Base.establish_connection(
-:adapter => "mysql",
-:host => "localhost",
-:database => "pt_stories"
-)
+ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml')))
+# ActiveRecord::Base.establish_connection(
+# :adapter => "mysql",
+# :host => "localhost",
+# :database => "pt_stories"
+# )
 
 class Story < ActiveRecord::Base
  validates_uniqueness_of :ticket_id

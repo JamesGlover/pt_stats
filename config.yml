@@ -1,0 +1,9 @@
+#development:
+  project_id: id
+  project_name: my project
+  iteration_length: 2
+  api_token: token
+  test_ticket_id: 'ID'
+  test_ticket_name: Name
+  username: admin
+  password: admin

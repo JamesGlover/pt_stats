@@ -8,7 +8,7 @@ module PtApi
   def self.fetch_story(id)
     
     if (!test?) || (test? && id!='2')
-      resource_uri = URI.parse("http://www.pivotaltracker.com/services/v3/projects/#{$PROJECT_ID}/stories/#{id}")
+      resource_uri = URI.parse("http://www.pivotaltracker.com/services/v3/projects/#{$SETTINGS["project_id"]}/stories/#{id}")
       proxy = URI.parse(ENV['HTTP_PROXY'])
       proxy_class = Net::HTTP::Proxy(proxy.host,proxy.port)
       data = fetch_xml(resource_uri,proxy_class)
@@ -27,7 +27,6 @@ module PtApi
       :ticket_type => "unknown",
       :created => DateTime.parse("01/01/2000")
     }
-    
     if data==nil
       # Do nothing
     else
@@ -35,6 +34,7 @@ module PtApi
         parse_xml(data,story_hash)
       else
         puts "XML is invalid or does not match story"
+        puts data
       end
     end
     
@@ -46,7 +46,7 @@ module PtApi
     @retried = false
     begin
       response = proxy.start(uri.host, uri.port) do |http|
-        http.get(uri.path, {'X-TrackerToken' => $API_TOKEN})
+        http.get(uri.path, {'X-TrackerToken' => $SETTINGS["api_token"]})
       end
       return REXML::Document.new(response.body)
     rescue

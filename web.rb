@@ -3,6 +3,7 @@ require 'rubygems'
 #require "bundler/setup"
 #require 'sinatra/activerecord'
 require 'erb'
+require 'yaml'
 require './models'
 require './pt_api'
 require 'rexml/document'
@@ -11,20 +12,28 @@ configure do
   set :raise_exceptions => true;
 end
 
+helpers do
 
+  def protected!
+    unless authorized?
+      response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+      throw(:halt, [401, "Not authorized\n"])
+    end
+  end
 
+  def authorized?
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [$SETTINGS['username'],$SETTINGS['password']]
+  end
+
+end
 
 # Setup globals
-$PROJECT_ID = '466613'
-$PROJECT_NAME = 'LIMS - core redesign'
-$ITERATION_LENGTH = 2
-$API_TOKEN = ''
-$TEST_TICKET_ID = ''
-$TEST_TICKET_NAME = ''
-#$ITERATION_SEED = TO BE IMPLIMENTED
+$SETTINGS = YAML::load(File.open('./config.yml'))
 
 # Display the goods
 get '/' do
+  protected!
   erb :index, :locals => {
     :project_created => Story.created().length,
     :project_started => Story.started().length,
@@ -33,6 +42,13 @@ get '/' do
     :project_accepted => Story.accepted().length,
     :project_total => Story.count()
     }
+end
+
+get '/setup' do
+  protected!
+  erb :setup, :locals => {
+    
+  }
 end
 
 # Record the details

@@ -10,7 +10,6 @@ require_relative '../web'
 require 'test/unit'
 require 'rack/test'
 
-
 class MyUnitTests < Test::Unit::TestCase
   include Rack::Test::Methods
   
@@ -37,12 +36,34 @@ class MyUnitTests < Test::Unit::TestCase
     assert(test?)
   end
   
+  
+  def test_without_authentication
+    get '/'
+    assert_equal 401, last_response.status
+  end
+
+  def test_with_bad_credentials
+    authorize 'bad', 'boy'
+    get '/'
+    assert_equal 401, last_response.status
+  end
+
+  def test_with_proper_credentials
+    authorize 'admin', 'admin'
+    get '/'
+    assert_equal 200, last_response.status
+    assert last_response.body.include?('Created')
+  end
+
+  
   def test_our_server_works()
+    authorize 'admin', 'admin'
     get '/'
     assert last_response.ok?
   end
   
   def test_return_includes_template()
+    authorize 'admin', 'admin'
     get '/'
     assert last_response.ok?
     assert last_response.body.include?('Created')
@@ -55,9 +76,10 @@ class MyUnitTests < Test::Unit::TestCase
   end
   
   def test_page_title_is_project()
+    authorize 'admin', 'admin'
     get '/'
     assert last_response.ok?
-    assert last_response.body.include?($PROJECT_NAME)
+    assert last_response.body.include?($SETTINGS["project_name"])
   end
   
   def test_post_requests_do_not_return_template()
@@ -100,6 +122,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_story_totals_returns_stories_in_state()
     provide_stories()
+    authorize 'admin', 'admin'
     get '/'
     assert last_response.ok?
     assert last_response.body.include?("<td id=\"project_created\">1</td>")
@@ -317,8 +340,8 @@ class MyUnitTests < Test::Unit::TestCase
   end
   
   def test_api_calls()
-    story = PtApi.fetch_story($TEST_TICKET_ID)
-    assert_equal($TEST_TICKET_NAME,story.name)
+    story = PtApi.fetch_story($SETTINGS["test_ticket_id"])
+    assert_equal($SETTINGS["test_ticket_name"],story.name)
     story.destroy
   end
   

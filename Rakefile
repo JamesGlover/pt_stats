@@ -24,12 +24,5 @@ end
   
 # namespace :test do
 #   require 'rake'
-#   require 'rake/tests'
-#   #require './test/test'
-#   puts "Testing"
-#   Rake::TestTask.new do |t|
-#       t.libs << "test"
-#       t.test_files = FileList['test/test*.rb']
-#       t.verbose = true
-#     end
+#   require './test/test'
 # end
