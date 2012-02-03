@@ -1,9 +1,19 @@
-#development:
-  project_id: id
-  project_name: my project
+development:
+  project_id: 466613
+  project_name: LIMS - core redesign
   iteration_length: 2
-  api_token: token
-  test_ticket_id: 'ID'
-  test_ticket_name: Name
   username: admin
-  password: admin
+  hash_password: "$2a$10$yj/TB.w.HRiFvUuHs.uaAuD64QGMCrBJIl6fq5MuDuj3qNDrjjhq6"
+  proxy: auto
+  bucket_code: ''
+    
+test:
+  project_id: 466613
+  project_name: LIMS - core redesign
+  iteration_length: 2
+  test_ticket_id: 24235441
+  test_ticket_name: New Story
+  username: admin
+  hash_password: "$2a$10$yj/TB.w.HRiFvUuHs.uaAuD64QGMCrBJIl6fq5MuDuj3qNDrjjhq6"
+  proxy: auto
+  bucket_code: ''

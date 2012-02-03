@@ -3,6 +3,7 @@ require 'logger'
 require 'yaml'
 
 #require 'sinatra/activerecord/rake'
+@environment = ENV['RACK_ENV'] || 'development'
 
 namespace :db do
   
@@ -10,7 +11,7 @@ namespace :db do
     puts "Defining environment"
     require 'active_record'
     require 'mysql'
-    ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml')))
+    ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
   end
   
   desc "Migrate the database"

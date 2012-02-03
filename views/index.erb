@@ -3,11 +3,13 @@
 <html lang='en'>
   <head>
     <title>Project Tracker: <%= $SETTINGS["project_name"] %></title>
+    <link rel="stylesheet" type="text/css" href="css/screen.css"/>
   </head>
   <body>
     <h1><%= $SETTINGS["project_name"] %></h1>
-    <table>
+    <table id="ticket_table">
       <tr>
+        <th></th>
         <th>Created / Rejected</th>
         <th>Started</th>
         <th>Finished</th>
@@ -16,14 +18,18 @@
         <th>Total</th>
       </tr>
       <tr>
-        <td id="project_created"><%= project_created %></td>
-        <td id="project_started"><%= project_started %></td>
-        <td id="project_finished"><%= project_finished %></td>
-        <td id="project_delivered"><%= project_delivered %></td>
-        <td id="project_accepted"><%= project_accepted %></td>
-        <td id="project_total"><%= project_total %></td>
+        <th id="project_head" class="project rowhead" rowspan=2>Project</th>
+        <td id="project_created" class="project created half"><%= project_created %></td>
+        <td id="project_started" class="project started" rowspan=2><%= project_started %></td>
+        <td id="project_finished" class="project finished" rowspan=2><%= project_finished %></td>
+        <td id="project_delivered" class="project delivered" rowspan=2><%= project_delivered %></td>
+        <td id="project_accepted" class="project accepted" rowspan=2><%= project_accepted %></td>
+        <td id="project_total" class="project total" rowspan=2><%= project_total %></td>
       </tr>
-      <tr></tr>
+      <tr>
+        <td id="project_rejected" class="project rejected half"><%= project_rejected %></td>
+      </tr>
     </table>
+    <%= message_render(messages) if defined? messages %>
   </body>
 </html>

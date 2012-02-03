@@ -7,89 +7,95 @@ require 'yaml'
 require './models'
 require './pt_api'
 require 'rexml/document'
+require 'bcrypt'
+require './helpers'
+
+# Setup globals
+@environment = ENV['RACK_ENV'] || 'development'
+$SETTINGS = YAML::load(File.open('./config.yml'))[@environment]
 
 configure do
   set :raise_exceptions => true;
+  #set :public_folder, File.dirname(__FILE__) + '/static'
 end
 
-helpers do
-
-  def protected!
-    unless authorized?
-      response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
-      throw(:halt, [401, "Not authorized\n"])
-    end
-  end
-
-  def authorized?
-    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-    @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [$SETTINGS['username'],$SETTINGS['password']]
-  end
-
-end
-
-# Setup globals
-$SETTINGS = YAML::load(File.open('./config.yml'))
+include Helpers
 
 # Display the goods
 get '/' do
   protected!
+  messages = []
+  if Story.count() == 0
+    messages << {
+      :id => 'databaseUnpopulated',
+      :classes => 'bad',
+      :title => 'Database unpopulated',
+      :body => "Your database is currently empty. If you have an existing Pivotal Tracker project, then you will need to import any existing stories. If you do not import existing stories then existing tickets will have incomple information. You can import stories via the <a href='populate'>database population tool</a>."
+    }
+  end
+  incomplete = Story.incomplete.length
+  if incomplete > 0
+    plural = 'stories'
+    plural = 'story' if incomplete == 1 
+    messages << {
+      :id => 'incompleteStories',
+      :classes => 'bad',
+      :title => 'Incomplete stories detected',
+      :body => "Your database contains #{incomplete} #{plural} with incomplete information. This can occur if you have not populated the database before connecting the Pivotal Tracker posthooks, or if a ticket creation event was not correctly recieved. You can repair incomplete stories via the <a href='populate'>database population tool</a>."
+    }
+  end
+  
   erb :index, :locals => {
     :project_created => Story.created().length,
+    :project_rejected => Story.rejected().length,
     :project_started => Story.started().length,
     :project_finished => Story.finished().length,
     :project_delivered => Story.delivered().length,
     :project_accepted => Story.accepted().length,
-    :project_total => Story.count()
+    :project_total => Story.count(),
+    :messages => messages
     }
 end
 
-get '/setup' do
+get '/populate' do
   protected!
-  erb :setup, :locals => {
-    
-  }
+  
+  pop_interface([],$SETTINGS['api_token']);
 end
 
-# Record the details
-post '/' do
-  xml = request.body.read
-  return nil if xml == ''
-  data = REXML::Document.new(xml)
-  return nil if data.root == nil || data.root.name != 'activity'
-  begin
-    event_type = data.elements["activity/event_type"].text
-    
-    date = DateTime.parse(data.elements["activity/occurred_at"].text)
-    data.elements.each("activity/stories/story") do |rec_story|
+post '/populate' do
+  protected!
+  messages=[]
+  
+  if params[:api_key] == ''
+    messages << {
+      :id => "no_api_key",
+      :classes => 'bad',
+      :title => 'Error: No API token',
+      :body => "No API token was provided; population of the database and repair of incomplete stories requires access to the Pivotal Tracker API. Please provide a Pivotal Tracker API token and try again. The API token can be found on your <a href='https://www.pivotaltracker.com/profile' target='_blank'>Pivotal Tracker profile page</a>."
+    }
+  elsif params[:submit] == 'Populate Database'
+    # Populate DB
+    messages << PtApi.populate_database($SETTINGS['project_id'],params[:api_key],'all')
+  elsif params[:submit] == 'Repair Database'
+    # Repair DB
+    messages << PtApi.populate_database($SETTINGS['project_id'],params[:api_key],Story.incomplete())
+  else
+    messages << {
+      :id => "invalid_post",
+      :classes => 'bad',
+      :title => 'Error: Invalid post request',
+      :body => "Whoops! Something went wrong; the server was unable to work out what you wanted to do.<br/>
+      <strong>Submit value:</strong>#{params[:submit]}<br/>
+      If you were not using the web interface to update the database, please ensure your request is valid."
+    }
+  end
+  
+  pop_interface(messages, params[:api_key]);
+end
 
-      # For each story: Should only be one
-      ticket_id = rec_story.elements["id"].text
-      db_story = Story.find_by_ticket_id(ticket_id)
-      if event_type =='story_create'
-        if db_story == nil # If out story doesn't exist, create it
-          db_story = Story.create!(
-          :ticket_id => ticket_id,
-          :name => rec_story.elements["name"].text,
-          :created => date,
-          :ticket_type => rec_story.elements["story_type"].text
-          )
-        else # Story already exists, this shouldn't ever really fire,
-             # but if tickets end up comming in the wrong order, it might be needed
-          db_story.created = date
-          db_story.save
-        end
-      elsif event_type == 'story_update'
-        if db_story == nil
-          db_story = PtApi.fetch_story(ticket_id)
-        end
-        new_state = rec_story.elements["current_state"].text
-        db_story.update_state(new_state,data.elements["activity/occurred_at"].text)
-      end
-    end
-  rescue
-    puts "XML Parsing Failed"
-    return nil
-  end  
-  return nil
+
+# Record the details
+post "/#{$SETTINGS['bucket_code']}" do
+  PtApi.incomming(request.body.read)
 end

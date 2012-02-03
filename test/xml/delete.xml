@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">157671637</id>
+  <version type="integer">14</version>
+  <event_type>story_delete</event_type>
+  <occurred_at type="datetime">2012/02/03 13:51:22 UTC</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover deleted &quot;Will Delete Story&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">3</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24417409</url>
+    </story>
+  </stories>
+</activity>

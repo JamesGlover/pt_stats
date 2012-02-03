@@ -12,8 +12,9 @@ The key config variables are located in config.yml
 project_id = The ID of the PT project to be tracked
 project_name = The project name: Displayed on the tracking screen
 iteration_length = The Iteration length in weeks
-api_token = the api token
+api_token = the api token (Optional: For security reasons you can provide the API key as needed)
 test_ticket_id = required to test api links
 test_ticket_name = the name corresponding to the test ticket
 username = the username for access
-password = the password for access
+password_hash = a bcrypt hashed password (Default is admin)
+bucket_code = adjusts the postbin URL

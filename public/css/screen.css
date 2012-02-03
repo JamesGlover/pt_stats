@@ -1,0 +1,52 @@
+
+* {margin:0;padding:0;}
+body {font-family: helvetica, arial, sans-serif; text-align:center; margin-top:3em;}
+H1, H2, H3 { margin:1em 0 0.5em 0;}
+
+input {
+  border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+  border: 0;
+  padding:0.5em;
+  font-size: large;
+  }
+label {
+  clear:both;
+  display:block;
+  padding: 1em 0 0.5em 0;
+}
+.tile {
+  display:inline-block;
+  margin: 0 1em;
+}
+.information {
+  padding:1em;
+  width:80%;
+  margin: 1em auto;
+  display:block;
+  border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
+  }
+  
+.neutral, .total, .started {background: #E4E4E4}
+.good, .valid, .populated, .accepted {background: #86EC96;}
+.bad, .unpopulated, .invalid, .rejected {background: #FF8995;}
+.created {background:#C9DADA;}
+.finished{background:#3C466F; color:white;}
+.delivered{background:#F0A222;}
+
+#ticket_table {margin:1em auto; display:block; width:600px;}
+
+#ticket_table td {
+  height:100px;
+  width: 100px;
+  border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
+  }
+  
+#ticket_table td.half {
+  height:50px;
+}
+
+th.rowhead {
+  -webkit-transform:rotate(270deg);
+	-moz-transform:rotate(270deg);
+	-o-transform: rotate(270deg);
+}

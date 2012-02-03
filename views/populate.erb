@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+  <head>
+    <title>Project Tracker: <%= $SETTINGS["project_name"] %>: Populate</title>
+    <link rel='stylesheet' type='text/css' href='css/screen.css'/>
+  </head>
+  <body>
+    <h1><%= $SETTINGS["project_name"] %></h1>
+    <h2>Database population tool</h2>
+    <form action='populate' method='post'>
+      <div id='description' class='information neutral'>
+        <p>This page allows you to populate the database with existing stories. It should be run before Pivotal Tracker post hooks are set up, to ensure that stories
+          already exist within the database. The tool also allow you to use the Pivotal tracker API to repair stories with incomplete information.</p>
+          <h3>Project Settings</h3>
+          <div class='tile'><label for='apiKey'>API Token: </label><input type='text' name='api_key' id='apiKey' placeholder='pivotal tracker api key' value='<%= api_token %>'/></div>
+          <div class='tile'><label for='projectID'>Project ID: </label><input type='text' name='project_id' id='projectID' value='<%= $SETTINGS['project_id'] %>' disabled/></div>
+        </div>
+        
+        <div id="message_holder">
+          <%= message_render(messages) if defined? messages %>
+        </div>
+
+      <div id='populateContainer' class='information <%= database_state %>'><h3>Database Population</h3>
+        <p>The database is currently <%= database_state %> and contains <%= project_total %> <%=
+        if project_total == 1
+          'story'
+        else
+          'stories'
+          end %>.
+          You <%= 'do not' if database_state=='populated'%> need to populate the database. <%
+          if database_state=='populated'
+            'Using the populate feature will import any stories not already in the database, and will update the names, states and types of existing entries.'
+          else
+            'If you have already populated the database, it may be that you project currently contains no stories, or you have incorrectly configured your project ID, or API key.'
+          end %>
+          </p>
+          <input type='submit' value='Populate Database' name='submit'/>
+        </div>
+        
+      <div id='populateContainer' class='information <%= invalid_stories %>'><h3>Repair Stories</h3>
+        <p><%=
+        instruct = "The IDs of the stories with invalid information are listed below. Please ensure that you have provided your pivotal tracker API key, and click the 'Repair Stories' button."
+        if invalid_stories_list.length == 1
+          "There is currently one story with missing information. #{instruct}"
+        elsif invalid_stories_list.length >1
+          "There are currently #{invalid_stories_list.length} stories with missing information. #{instruct}"
+        else
+          "There are currently no stories with missing information. You do not need to repair the database."
+        end
+        %></p>
+        <%= idlist_render(invalid_stories_list) %>
+        <input type='submit' value='Repair Database' name='submit'/>
+      </div>
+    </form>
+  </body>
+</html>

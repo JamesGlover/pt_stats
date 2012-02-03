@@ -1,4 +1,11 @@
-#development:
+development:
+  adapter: mysql
+  database: pt_stories
+  username: root
+  password:
+  port: 3306
+  
+test:
   adapter: mysql
   database: pt_stories
   username: root

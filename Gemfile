@@ -6,6 +6,7 @@ gem 'activerecord'
 gem 'rake'
 gem 'rack'
 gem 'rack-test'
+gem 'bcrypt-ruby'
 
 group :development do
   gem "mysql"

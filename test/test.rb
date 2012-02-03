@@ -43,7 +43,7 @@ class MyUnitTests < Test::Unit::TestCase
   end
 
   def test_with_bad_credentials
-    authorize 'bad', 'boy'
+    authorize 'admin', 'not the password'
     get '/'
     assert_equal 401, last_response.status
   end
@@ -125,12 +125,13 @@ class MyUnitTests < Test::Unit::TestCase
     authorize 'admin', 'admin'
     get '/'
     assert last_response.ok?
-    assert last_response.body.include?("<td id=\"project_created\">1</td>")
-    assert last_response.body.include?("<td id=\"project_started\">2</td>")
-    assert last_response.body.include?("<td id=\"project_finished\">2</td>")
-    assert last_response.body.include?("<td id=\"project_delivered\">1</td>")
-    assert last_response.body.include?("<td id=\"project_accepted\">3</td>")
-    assert last_response.body.include?("<td id=\"project_total\">9</td>")
+    assert last_response.body.include?("<td id=\"project_created\" class=\"project created half\">1</td>")
+    assert last_response.body.include?("<td id=\"project_rejected\" class=\"project rejected half\">0</td>")
+    assert last_response.body.include?("<td id=\"project_started\" class=\"project started\" rowspan=2>2</td>")
+    assert last_response.body.include?("<td id=\"project_finished\" class=\"project finished\" rowspan=2>2</td>")
+    assert last_response.body.include?("<td id=\"project_delivered\" class=\"project delivered\" rowspan=2>1</td>")
+    assert last_response.body.include?("<td id=\"project_accepted\" class=\"project accepted\" rowspan=2>3</td>")
+    assert last_response.body.include?("<td id=\"project_total\" class=\"project total\" rowspan=2>9</td>")
   end
   
   def test_state_returns_current_state()
@@ -327,30 +328,104 @@ class MyUnitTests < Test::Unit::TestCase
   
   end
   
-  def test_uncreated_tickets_poll_the_api()
+  def test_uncreated_tickets_get_default_data()
     File.open("./test/xml/start2.xml") do |file|
       post '/',file.read()
     end
     story = Story.find_by_ticket_id(2)
-    assert_equal('New Story',story.name)
+    assert_equal('Unknown story',story.name)
     assert_equal('started',story.state)
-    assert_equal(DateTime.parse('2012/01/31 17:09:06 UTC'),story.created)
+    assert_equal(DateTime.parse('01/01/2000'),story.created)
     assert_equal(DateTime.parse('2012/02/01 14:56:37 UTC'),story.started)
-    assert_equal('feature',story.ticket_type)
+    assert_equal('unknown',story.ticket_type)
   end
   
   def test_api_calls()
-    story = PtApi.fetch_story($SETTINGS["test_ticket_id"])
-    assert_equal($SETTINGS["test_ticket_name"],story.name)
-    story.destroy
+    assert $SETTINGS["api_token"]
+    resource_uri = URI.parse("http://www.pivotaltracker.com/services/v3/projects/#{$SETTINGS["project_id"]}/stories/#{$SETTINGS["test_ticket_id"]}")
+    data = PtApi.fetch_xml(resource_uri,$SETTINGS["api_token"])
+    assert PtApi.check_xml(data,$SETTINGS["test_ticket_id"])
+  end
+  
+  def test_link_to_populate_page_when_database_empty()
+    authorize 'admin', 'admin'
+    get '/'
+    assert_equal 200, last_response.status
+    assert last_response.body.include?("<a href='populate'>")
+  end
+  
+  def test_populate_functions_work()
+   assert Story.count() == 0
+   assert $SETTINGS['api_token'] != nil
+   message = PtApi.populate_database($SETTINGS['project_id'],$SETTINGS['api_token'],'all')
+   assert Story.count() > 0
+   story = Story.find_by_ticket_id($SETTINGS["test_ticket_id"])
+   assert (story.name == $SETTINGS["test_ticket_name"])
+  end
+  
+  def test_incomplete_tickets_returns_incomplete_tickets()
+    ['1','2','3','6','9'].each do |ticket_id|
+      Story.create!( # Create story with placeholders
+        :ticket_id => ticket_id,
+        :name => "Unknown story",
+        :created => DateTime.parse('01/01/2000'),
+        :ticket_type => 'unknown'
+        )
+      end
+      ['4','5','7','8'].each do |ticket_id|
+        Story.create!( # Create story with placeholders
+          :ticket_id => ticket_id,
+          :name => "Valid story",
+          :created => DateTime.parse('01/01/2001'),
+          :ticket_type => 'bug'
+          )
+        end
+    incomplete = Story.incomplete()
+    assert incomplete.length == 5
+    assert incomplete.include?(1)
+    assert incomplete.include?(6)
+    assert !incomplete.include?(4)
+    assert !incomplete.include?(8)
+  end
+  
+  def test_update_stories_updates()
+    File.open("./test/xml/start2.xml") do |file|
+      post '/',file.read()
+    end
+    incomplete = Story.incomplete()
+    assert incomplete.include?(2)
+    story = Story.find_by_ticket_id(2)
+    story.ticket_id=$SETTINGS["test_ticket_id"]
+    story.save()
+    assert_equal('Unknown story',story.name)
+    PtApi.populate_database($SETTINGS['project_id'],$SETTINGS['api_token'],incomplete)
+    story.reload()
+    assert story.name == $SETTINGS["test_ticket_name"]
+  end
+  
+  def test_stories_can_be_deleted()
+    provide_stories()
+    story = Story.find_by_ticket_id(3)
+    story.delete('2007-08-01') # Delete a story
+    story.reload()
+    assert_equal(true, story.deleted?)
+    assert_equal('deleted',story.state()) 
+    assert_equal(8,Story.total.length) # It doesn't count
+    assert_equal(9,Story.count()) # But it is not gone forever
+    assert_equal(1,Story.started.length)
+  end
+  
+  def test_post_calls_delete_stories()
+    provide_stories()
+    File.open("./test/xml/delete.xml") do |file|
+      post '/',file.read()
+    end
+    story = Story.find_by_ticket_id(3)
+    story.deleted?
   end
   
   def teardown
-    (1..9).each do |i|
-      if Story.find_by_ticket_id(i)
-        Story.find_by_ticket_id(i).destroy()
-      end
-    end
+    Story.delete_all()
   end
   
 end
