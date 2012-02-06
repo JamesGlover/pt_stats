@@ -76,10 +76,16 @@ post '/populate' do
     }
   elsif params[:submit] == 'Populate Database'
     # Populate DB
-    messages << PtApi.populate_database($SETTINGS['project_id'],params[:api_key],'all')
+    PtApi.populate_database(messages, $SETTINGS['project_id'],params[:api_key],'all')
   elsif params[:submit] == 'Repair Database'
     # Repair DB
-    messages << PtApi.populate_database($SETTINGS['project_id'],params[:api_key],Story.incomplete())
+    PtApi.populate_database(messages, $SETTINGS['project_id'],params[:api_key],Story.incomplete())
+  elsif params[:submit] == 'Flag All Deleted Stories'
+    #Todo: Flag all deleted
+    PtApi.flag_deleted_items(messages,$SETTINGS['project_id'],params[:api_key],'all')
+  elsif params[:submit] == 'Flag Listed Deleted Stories'
+    # Todo: Flag Listed deleted
+    PtApi.flag_deleted_items(messages,$SETTINGS['project_id'],params[:api_key],params[:del_ids])
   else
     messages << {
       :id => "invalid_post",

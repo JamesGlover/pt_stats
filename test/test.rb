@@ -4,11 +4,19 @@ if ARGV.include?('--clear')
   $CLEAR = true
 end
 
-
 require 'rubygems'
 require_relative '../web'
 require 'test/unit'
 require 'rack/test'
+
+$SETTINGS['api_token']=ARGV[ARGV.index('-a')+1] if ARGV.index('-a')!= nil
+
+
+if $SETTINGS['api_token'] != nil
+  puts "Using API key: #{$SETTINGS['api_token']}"
+else
+  puts "No API key provided. Either edit /config.yml or provide the argument -a APIKEYHERE"
+end
 
 class MyUnitTests < Test::Unit::TestCase
   include Rack::Test::Methods
@@ -18,10 +26,10 @@ class MyUnitTests < Test::Unit::TestCase
   end
   
   def setup
-    (1..9).each do |i|
-      if Story.find_by_ticket_id(i)
+
+      if Story.count > 0
         if $CLEAR
-          Story.find_by_ticket_id(i).destroy()
+          Story.destroy_all()
         else
           puts "WARNING! Database already populated with test entry"
           puts "Use -- --clear to automatically remove tickets"
@@ -29,7 +37,7 @@ class MyUnitTests < Test::Unit::TestCase
           Process::exit
         end
       end
-    end
+
   end
   
   def test_testing_environment()
@@ -83,7 +91,7 @@ class MyUnitTests < Test::Unit::TestCase
   end
   
   def test_post_requests_do_not_return_template()
-    post '/'
+    post '/bucket'
     assert_equal '', last_response.body
   end
   
@@ -265,13 +273,13 @@ class MyUnitTests < Test::Unit::TestCase
   end
   
   def test_post()
-    post '/','test'
+    post '/bucket','test'
     assert_equal '', last_response.body
   end
   
   def test_create_events_create_a_story()
     File.open("./test/xml/create.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -281,7 +289,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_update_events_update_a_story()
     File.open("./test/xml/create.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -289,7 +297,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
     
     File.open("./test/xml/start.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story.reload()
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -297,7 +305,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
     assert_equal(DateTime.parse('2012/02/01 11:05:51 UTC'),story.started)
     File.open("./test/xml/accepted.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story.reload()
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -311,7 +319,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_other_events_have_no_effect()
     File.open("./test/xml/create.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -319,7 +327,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
     
     File.open("./test/xml/note.xml")do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
@@ -330,7 +338,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_uncreated_tickets_get_default_data()
     File.open("./test/xml/start2.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(2)
     assert_equal('Unknown story',story.name)
@@ -357,7 +365,7 @@ class MyUnitTests < Test::Unit::TestCase
   def test_populate_functions_work()
    assert Story.count() == 0
    assert $SETTINGS['api_token'] != nil
-   message = PtApi.populate_database($SETTINGS['project_id'],$SETTINGS['api_token'],'all')
+   PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
    assert Story.count() > 0
    story = Story.find_by_ticket_id($SETTINGS["test_ticket_id"])
    assert (story.name == $SETTINGS["test_ticket_name"])
@@ -390,7 +398,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_update_stories_updates()
     File.open("./test/xml/start2.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     incomplete = Story.incomplete()
     assert incomplete.include?(2)
@@ -398,9 +406,10 @@ class MyUnitTests < Test::Unit::TestCase
     story.ticket_id=$SETTINGS["test_ticket_id"]
     story.save()
     assert_equal('Unknown story',story.name)
-    PtApi.populate_database($SETTINGS['project_id'],$SETTINGS['api_token'],incomplete)
+    incomplete = Story.incomplete()
+    PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],incomplete)
     story.reload()
-    assert story.name == $SETTINGS["test_ticket_name"]
+    assert_equal($SETTINGS['test_ticket_name'], story.name)
   end
   
   def test_stories_can_be_deleted()
@@ -418,10 +427,30 @@ class MyUnitTests < Test::Unit::TestCase
   def test_post_calls_delete_stories()
     provide_stories()
     File.open("./test/xml/delete.xml") do |file|
-      post '/',file.read()
+      post '/bucket',file.read()
     end
     story = Story.find_by_ticket_id(3)
     story.deleted?
+  end
+  
+  def test_scan_for_all_deleted_stories()
+    provide_stories()
+    Story.create!(:ticket_id=>$SETTINGS["test_ticket_id"])
+    PtApi.flag_deleted_items([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
+    assert Story.find_by_ticket_id(2).deleted?
+    assert Story.find_by_ticket_id(4).deleted?
+    assert Story.find_by_ticket_id(9).deleted?
+    assert !Story.find_by_ticket_id($SETTINGS["test_ticket_id"]).deleted?
+  end
+  
+  def test_scan_for_specific_deleted_stories()
+    provide_stories()
+    Story.create(:ticket_id=>$SETTINGS["test_ticket_id"])
+    PtApi.flag_deleted_items([],$SETTINGS['project_id'],$SETTINGS['api_token'],"2,4,#{$SETTINGS["test_ticket_id"]}")
+    assert Story.find_by_ticket_id(2).deleted?
+    assert Story.find_by_ticket_id(4).deleted?
+    assert !Story.find_by_ticket_id(9).deleted?
+    assert !Story.find_by_ticket_id($SETTINGS["test_ticket_id"]).deleted?
   end
   
   def teardown

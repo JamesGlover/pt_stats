@@ -38,7 +38,7 @@
           <input type='submit' value='Populate Database' name='submit'/>
         </div>
         
-      <div id='populateContainer' class='information <%= invalid_stories %>'><h3>Repair Stories</h3>
+      <div id='repairContainer' class='information <%= invalid_stories %>'><h3>Repair Stories</h3>
         <p><%=
         instruct = "The IDs of the stories with invalid information are listed below. Please ensure that you have provided your pivotal tracker API key, and click the 'Repair Stories' button."
         if invalid_stories_list.length == 1
@@ -52,6 +52,14 @@
         <%= idlist_render(invalid_stories_list) %>
         <input type='submit' value='Repair Database' name='submit'/>
       </div>
+      
+      <div id='deleteContainer' class='information neutral'><h3>'Delete' Stories</h3>
+        <p>The system should automatically flag stories as deleted when Pivotal Tracker generates a delete event. However, if you suspect that this hasn't occurred, you can delete tickets through this interface.</p>
+        <input type='submit' value='Flag All Deleted Stories' name='submit'/>
+        <input type='text' name='del_ids' value=''/>
+        <input type='submit' value='Flag Listed Deleted Stories' name='submit'/>
+      </div>
+      
     </form>
   </body>
 </html>

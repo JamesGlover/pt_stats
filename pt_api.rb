@@ -55,7 +55,7 @@ module PtApi
     
     begin
       response = proxy_class.start(uri.host, uri.port) do |http|
-        http.get(uri.path, {'X-TrackerToken' => api_key})
+        http.get("#{uri.path}?#{uri.query}", {'X-TrackerToken' => api_key})
       end
       return REXML::Document.new(response.body)
     rescue
@@ -137,43 +137,65 @@ module PtApi
     end
   end
   
-  def self.populate_database(id,api,id_list)
-    #TODO: Populate/Repair DB
-    api_filter=""
-    task = 0
-    if id_list !='all'
-      api_filter << '?filter=id:' << id_list.join(',')
-      task = 1
+  def self.paginate(messages,id,api,con_list,page,task)
+    
+    api_filter="?limit=#{$SETTINGS['page_size']}&offset=#{page*$SETTINGS['page_size']}&filter=includedone:true"
+
+    if con_list !='all'
+      api_filter << '%20id:' << con_list
     end
-    uri = URI.parse("http://www.pivotaltracker.com/services/v3/projects/#{id}/stories/#{api_filter}")
+    uri = URI.parse("#{$SETTINGS['pt_api']}#{id}/stories#{api_filter}")
     data = fetch_xml(uri,api)
     
     if data == nil
-      return {
+      messages << {
         :id => 'bad_api',
         :classes => 'bad',
         :title => 'Error: Could not connect to API',
-        :body => "The server could not connect to the Pivotal Tracker API. Check that your proxy settings are configured correctly, and that the Pivotal Tracker API is operational. The database has not been #{['populated','repaired'][task]}."
+        :body => "The server could not connect to the Pivotal Tracker API. Check that your proxy settings are configured correctly, and that the Pivotal Tracker API is operational. The database has not been #{['populated','repaired','updated'][task]}."
       }
+      return false
     end
     if data.to_s.include? 'Access denied.'
-      return {
+      messages << {
         :id => 'bad_api',
         :classes => 'bad',
         :title => 'Error: Access Denied',
-        :body => "The server was forbidden from connecting to the Pivotal Tracker API. Check your API key and try again. The database has not been #{['populated','repaired'][task]}."
+        :body => "The server was forbidden from connecting to the Pivotal Tracker API. Check your API key and try again. The database has not been #{['populated','repaired','updated'][task]}."
       }
+      return false
     end
     
     check = check_xml(data,'all')
     if !check[:status]
-      return {
+      messages << {
         :id => 'bad_xml',
         :classes => 'bad',
-        :title => 'Error: Invalid XML returned',
+        :title => 'Error: Invalid XML returned on page #{page}',
         :body => "#{check[:message]}"
       }
+      return false
     end
+    
+    # Check pagination
+    position = page*$SETTINGS['page_size'] + $SETTINGS['page_size'] # Using expected values, as those returned by the API are unreliable (Ie. They are nill if we are using the defaults.)
+    if position < data.root.attributes['total'].to_i
+      new_data = paginate(messages,id,api,con_list,page+1,task)
+      data.root << new_data.root.elements["story"] if new_data # If we have something, concatenate it
+    end
+    return data
+  end
+  
+  def self.populate_database(messages,id,api,id_list)
+    
+    con_list ='all'
+    task = 0
+    if id_list !='all'
+      con_list = id_list.join(',')
+      task = 1
+    end
+    
+    data = paginate(messages,id,api,con_list,0,task)
     
     # Parsing XML
       begin
@@ -193,9 +215,9 @@ module PtApi
           end
         end
         
-      report(success,total,parse_error,create_error,task,id_list)
+      messages << report(success,total,parse_error,create_error,task,id_list)
       rescue
-        return {
+        messages << {
           :id => 'parsing_failure',
           :classes => 'bad',
           :title => 'Error: Problems parsing XML',
@@ -208,9 +230,73 @@ module PtApi
     
   end
   
-  def self.report(success,total,parse_error,create_error,task,id_list)
-    # Generate report
+  
+  def self.flag_deleted_items(messages,id,api,con_list)
+
+    task = 2  
+    data = paginate(messages,id,api,con_list,0,task)
+    if con_list=='all'
+      id_list = Story.total.map do |story|
+        story.ticket_id().to_s
+      end
+    else
+      id_list = con_list.split(',')
+    end
+    found = 0
     
+    # Parsing XML
+
+      begin
+        total = data.root.attributes['total']
+        scanned = id_list.length
+        found_ids = []
+        
+        data.elements.each('stories/story') do |story|
+          if story.elements["id"]
+            found_ids << story.elements["id"].text
+          end
+        end   
+      rescue
+        messages << {
+          :id => 'parsing_failure',
+          :classes => 'bad',
+          :title => 'Error: Problems parsing XML',
+          :body => "The XML was not parsed correctly. The process has been aborted"
+        }
+        return false
+      end
+      begin
+        deleted = []
+        id_list.each do |id|
+          if !found_ids.include?(id)
+            Story.find_by_ticket_id(id).delete(Time.new.to_s)
+            deleted << id
+          end
+        end
+      rescue
+              puts "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
+              bod = "A problem occured while deleting stories.<br/>"
+              bod << "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
+              messages << {
+                :id => 'deletion_failure',
+                :classes => 'bad',
+                :title => 'Error: Problems deleting stories',
+                :body => bod
+              }
+              return false
+            end
+      messages << {
+        :id => 'stories_deleted',
+        :classes => 'good',
+        :title => 'Stories sucesfully deleted',
+        :body => "Of the #{scanned} stories tested, #{deleted.length} could not be found in the Pivitol Tracker database, and have been flagged as deleted.<br/>
+        <strong>Flagged IDs:</strong> #{deleted.join(',')}"
+      }
+    
+  end
+  
+  def self.report(success,total,parse_error,create_error,task,id_list)
+    # Generate report   
     status = 0
     classes = ['good','bad']
     title = ["Stories sucesfully #{['imported','repaired'][task]}","Stories #{['imported','repaired'][task]} with errors"]
@@ -222,10 +308,6 @@ module PtApi
     if create_error > 0
       status = 1
       message << "#{create_error} stories could not be created. "
-    end
-    if (total.to_i >= 3000)
-      status = 1
-      message << "Caution! The Pivotal Tracker API returned #{total} stories. At the time of development, the API is limited to returning a maximum of 3000 stories in any one query. Some stories may have not been #{['imported','repaired'][task]}. "
     end
     if (success + parse_error + create_error) < total.to_i
       status = 1
