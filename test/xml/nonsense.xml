@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dilly>
+  <dally>
+    <silly>Sally</silly>
+    <foo>bar</foo>
+    <xyzzy outcome="nothing happens" />
+    <submarine>
+      <colour>yellow</colour>
+    </submarine>
+  </dally>
+</dilly>

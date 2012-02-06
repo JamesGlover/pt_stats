@@ -6,37 +6,38 @@ ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))
 
 
 class Story < ActiveRecord::Base
- validates_uniqueness_of :ticket_id
+ #validates_uniqueness_of :ticket_id
+ validates_uniqueness_of :ticket_id, :scope => :rejected_close
  validates_presence_of :ticket_id
  
  # Self methods
 
  def self.created()
-   self.where("created IS NOT NULL AND started IS NULL AND rejected IS NULL AND deleted IS NULL")
+   self.where("created IS NOT NULL AND started IS NULL AND finished IS NULL AND delivered IS NULL AND accepted IS NULL AND rejected_close IS NULL AND deleted IS NULL")
  end
  
  def self.rejected()
-   self.where("rejected IS NOT NULL AND started IS NULL AND deleted IS NULL")
+   self.where("rejected_open IS NOT NULL AND deleted IS NULL AND rejected_close IS NULL")
  end
  
  def self.started()
-   self.where("started IS NOT NULL AND finished IS NULL AND deleted IS NULL")
+   self.where("started IS NOT NULL AND finished IS NULL AND delivered IS NULL AND accepted IS NULL AND rejected_close IS NULL AND deleted IS NULL")
  end
  
  def self.finished()
-   self.where("finished IS NOT NULL AND delivered IS NULL AND deleted IS NULL")
+   self.where("finished IS NOT NULL AND delivered IS NULL AND accepted IS NULL AND rejected_close IS NULL AND deleted IS NULL")
  end
  
  def self.delivered()
-   self.where("delivered IS NOT NULL AND accepted IS NULL AND deleted IS NULL")
+   self.where("delivered IS NOT NULL AND accepted IS NULL AND rejected_close IS NULL AND deleted IS NULL")
  end
   
  def self.accepted()
-   self.where("accepted IS NOT NULL AND deleted IS NULL")
+   self.where("accepted IS NOT NULL AND rejected_close IS NULL AND deleted IS NULL")
  end
 
  def self.total()
-   self.where("created IS NOT NULL AND deleted IS NULL")
+   self.where("created IS NOT NULL AND deleted IS NULL AND rejected_close IS NULL")
  end
  
  def self.deleted()
@@ -50,14 +51,19 @@ class Story < ActiveRecord::Base
      story.ticket_id
    end
  end
+ 
+ def self.find_by_active_ticket_id(id)
+  Story.find_by_ticket_id_and_rejected_close(id,nil)
+ end
 
  # Methods
  
  def state()
-   states = ['deleted','accepted','delivered','finished','started','rejected','created']
+   states = ['deleted','accepted','delivered','finished','started','rejected_open','created']
    states.each do |s|
      if self.send (s+'?')
-       return s
+       return s unless s=='rejected_open'
+       return 'rejected'
      end
    end
  end
@@ -69,23 +75,22 @@ class Story < ActiveRecord::Base
    date = DateTime.parse(date)
    states = ['created','started','finished','delivered','accepted']
    return false unless states.include?(new_state)
-   states.each do |s|
-     unless self.send(s+'?')
-       self.send(s+'=', date)
-     end
-     break if new_state==s
-   end
+   self.send(new_state+'=', date)
    self.save
  end
  
  def reject(date)
-   states = ['started','finished','delivered','accepted']
-   states.each do |s|
-     self.send(s+'=',nil)
-   end
-   self.rejected= DateTime.parse(date)
+   self.rejected_close= DateTime.parse(date)
    self.rejection_count = self.rejection_count() + 1
    self.save
+   Story.create!(
+    :ticket_id=>self.ticket_id,
+    :name=>self.name,
+    :ticket_type=>self.ticket_type,
+    :created=>self.created,
+    :rejected_open=>DateTime.parse(date),
+    :rejection_count=>self.rejection_count()
+    )
  end
  
  def delete(date)

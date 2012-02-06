@@ -10,7 +10,8 @@ class MigrateStory < ActiveRecord::Migration
           t.datetime :finished
           t.datetime :delivered
           t.datetime :accepted
-          t.datetime :rejected
+          t.datetime :rejected_open
+          t.datetime :rejected_close
           t.datetime :deleted
           t.string :ticket_type
           t.integer :rejection_count, :default => 0

@@ -121,7 +121,7 @@ module PtApi
   
   def self.create_story(hash)
     begin
-      db_story = Story.find_or_create_by_ticket_id(hash[:ticket_id]) 
+      db_story = Story.find_or_create_by_ticket_id_and_rejected_close(hash[:ticket_id],nil) 
       db_story.created = hash[:created]
       db_story.name = hash[:name]
       db_story.ticket_type = hash[:ticket_type]
@@ -269,7 +269,7 @@ module PtApi
         deleted = []
         id_list.each do |id|
           if !found_ids.include?(id)
-            Story.find_by_ticket_id(id).delete(Time.new.to_s)
+            Story.find_by_active_ticket_id(id).delete(Time.new.to_s)
             deleted << id
           end
         end
@@ -363,7 +363,7 @@ module PtApi
       data.elements.each("stories/story") do |rec_story|
         # For each story: Should only be one
         ticket_id = rec_story.elements["id"].text
-        db_story = Story.find_or_create_by_ticket_id(ticket_id)
+        db_story = Story.find_or_create_by_ticket_id_and_rejected_close(ticket_id,nil)
         if event_type =='story_create'
           db_story.name = rec_story.elements["name"].text
           db_story.created = date

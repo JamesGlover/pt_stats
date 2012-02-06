@@ -111,7 +111,7 @@ class MyUnitTests < Test::Unit::TestCase
     :name => 'foo',
     :created => '2012-01-31 [14:31:32]',
     :ticket_type => 'bug')
-    story = Story.find_by_ticket_id(1)
+    story = Story.find_by_active_ticket_id(1)
     assert_equal(1,story.ticket_id)
     assert_equal('foo',story.name)
     assert_equal(DateTime.parse('2012-01-31 [14:31:32]'),story.created)
@@ -144,63 +144,63 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_state_returns_current_state()
     provide_stories()
-    assert_equal("created",Story.find_by_ticket_id(1).state)
-    assert_equal("started",Story.find_by_ticket_id(2).state)
-    assert_equal("started",Story.find_by_ticket_id(3).state)
-    assert_equal("finished",Story.find_by_ticket_id(4).state)
-    assert_equal("finished",Story.find_by_ticket_id(5).state)
-    assert_equal("delivered",Story.find_by_ticket_id(6).state)
-    assert_equal("accepted",Story.find_by_ticket_id(7).state)
-    assert_equal("accepted",Story.find_by_ticket_id(8).state)
-    assert_equal("accepted",Story.find_by_ticket_id(9).state)
+    assert_equal("created",Story.find_by_active_ticket_id(1).state)
+    assert_equal("started",Story.find_by_active_ticket_id(2).state)
+    assert_equal("started",Story.find_by_active_ticket_id(3).state)
+    assert_equal("finished",Story.find_by_active_ticket_id(4).state)
+    assert_equal("finished",Story.find_by_active_ticket_id(5).state)
+    assert_equal("delivered",Story.find_by_active_ticket_id(6).state)
+    assert_equal("accepted",Story.find_by_active_ticket_id(7).state)
+    assert_equal("accepted",Story.find_by_active_ticket_id(8).state)
+    assert_equal("accepted",Story.find_by_active_ticket_id(9).state)
   end
   
   def test_update_state_updates_state()
     provide_stories()
-    assert_equal("created",Story.find_by_ticket_id(1).state)
-    Story.find_by_ticket_id(1).update_state("started","2013/01/31 13:37:51 UTC")
-    assert_equal("started",Story.find_by_ticket_id(1).state)
-    assert_equal(true,Story.find_by_ticket_id(1).created?)
-    assert_equal(true,Story.find_by_ticket_id(1).started?)
-    assert_equal(false,Story.find_by_ticket_id(1).finished?)
-    assert_equal(false,Story.find_by_ticket_id(1).delivered?)
-    assert_equal(false,Story.find_by_ticket_id(1).accepted?)
-    assert_equal(false,Story.find_by_ticket_id(1).rejected?)
+    assert_equal("created",Story.find_by_active_ticket_id(1).state)
+    Story.find_by_active_ticket_id(1).update_state("started","2013/01/31 13:37:51 UTC")
+    assert_equal("started",Story.find_by_active_ticket_id(1).state)
+    assert_equal(true,Story.find_by_active_ticket_id(1).created?)
+    assert_equal(true,Story.find_by_active_ticket_id(1).started?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).finished?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).delivered?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).accepted?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).rejected_open?)
     
     # Check we can skip a stage (In case we miss an update)
-    Story.find_by_ticket_id(1).update_state("delivered","2014/01/31 13:37:51 UTC")
-    assert_equal("delivered",Story.find_by_ticket_id(1).state)
-    assert_equal(true,Story.find_by_ticket_id(1).created?)
-    assert_equal(true,Story.find_by_ticket_id(1).started?)
-    assert_equal(true,Story.find_by_ticket_id(1).finished?)
-    assert_equal(true,Story.find_by_ticket_id(1).delivered?)
-    assert_equal(false,Story.find_by_ticket_id(1).accepted?)
-    assert_equal(false,Story.find_by_ticket_id(1).rejected?)
+    Story.find_by_active_ticket_id(1).update_state("delivered","2014/01/31 13:37:51 UTC")
+    assert_equal("delivered",Story.find_by_active_ticket_id(1).state)
+    assert_equal(true,Story.find_by_active_ticket_id(1).created?)
+    assert_equal(true,Story.find_by_active_ticket_id(1).started?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).finished?)
+    assert_equal(true,Story.find_by_active_ticket_id(1).delivered?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).accepted?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).rejected_open?)
     
     # Check that we can't go back a stage
-    Story.find_by_ticket_id(1).update_state("started","2014/01/31 13:37:51 UTC")
-    assert_equal("delivered",Story.find_by_ticket_id(1).state)
-    assert_equal(true,Story.find_by_ticket_id(1).created?)
-    assert_equal(true,Story.find_by_ticket_id(1).started?)
-    assert_equal(true,Story.find_by_ticket_id(1).finished?)
-    assert_equal(true,Story.find_by_ticket_id(1).delivered?)
-    assert_equal(false,Story.find_by_ticket_id(1).accepted?)
-    assert_equal(false,Story.find_by_ticket_id(1).rejected?)
+    Story.find_by_active_ticket_id(1).update_state("started","2014/01/31 13:37:51 UTC")
+    assert_equal("delivered",Story.find_by_active_ticket_id(1).state)
+    assert_equal(true,Story.find_by_active_ticket_id(1).created?)
+    assert_equal(true,Story.find_by_active_ticket_id(1).started?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).finished?)
+    assert_equal(true,Story.find_by_active_ticket_id(1).delivered?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).accepted?)
+    assert_equal(false,Story.find_by_active_ticket_id(1).rejected_open?)
   end
   
   def test_reject_clears_states()
     provide_stories()
-    assert_equal(0,Story.find_by_ticket_id(6).rejection_count)
-    Story.find_by_ticket_id(6).reject("2014/01/31 13:37:51 UTC")
-    assert_equal("rejected",Story.find_by_ticket_id(6).state)
-    assert_equal(true,Story.find_by_ticket_id(6).created?)
-    assert_equal(false,Story.find_by_ticket_id(6).started?)
-    assert_equal(false,Story.find_by_ticket_id(6).finished?)
-    assert_equal(false,Story.find_by_ticket_id(6).delivered?)
-    assert_equal(false,Story.find_by_ticket_id(6).accepted?)
-    assert_equal(1,Story.find_by_ticket_id(6).rejection_count)
-    Story.find_by_ticket_id(6).reject("2015/01/31 13:37:51 UTC")
-    assert_equal(2,Story.find_by_ticket_id(6).rejection_count)
+    assert_equal(0,Story.find_by_active_ticket_id(6).rejection_count)
+    Story.find_by_active_ticket_id(6).reject("2014/01/31 13:37:51 UTC")
+    assert_equal("rejected",Story.find_by_active_ticket_id(6).state)
+    assert_equal(true,Story.find_by_active_ticket_id(6).created?)
+    assert_equal(false,Story.find_by_active_ticket_id(6).started?)
+    assert_equal(false,Story.find_by_active_ticket_id(6).finished?)
+    assert_equal(false,Story.find_by_active_ticket_id(6).delivered?)
+    assert_equal(false,Story.find_by_active_ticket_id(6).accepted?)
+    assert_equal(1,Story.find_by_active_ticket_id(6).rejection_count)
+    Story.find_by_active_ticket_id(6).reject("2015/01/31 13:37:51 UTC")
+    assert_equal(2,Story.find_by_active_ticket_id(6).rejection_count)
   end
   
   def provide_stories()
@@ -281,7 +281,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/create.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(1)
+    story = Story.find_by_active_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('created',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
@@ -291,7 +291,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/create.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(1)
+    story = Story.find_by_active_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('created',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
@@ -312,8 +312,6 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal('accepted',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
     assert_equal(DateTime.parse('2012/02/01 11:05:51 UTC'),story.started)
-    assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.finished)
-    assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.delivered)
     assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.accepted)
   end
   
@@ -321,7 +319,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/create.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(1)
+    story = Story.find_by_active_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('created',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
@@ -329,7 +327,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/note.xml")do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(1)
+    story = Story.find_by_active_ticket_id(1)
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('created',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
@@ -339,7 +337,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/activities.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(24220815)
+    story = Story.find_by_active_ticket_id(24220815)
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('accepted',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
@@ -350,7 +348,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/start2.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(2)
+    story = Story.find_by_active_ticket_id(2)
     assert_equal('Unknown story',story.name)
     assert_equal('started',story.state)
     assert_equal(DateTime.parse('01/01/2000'),story.created)
@@ -377,7 +375,7 @@ class MyUnitTests < Test::Unit::TestCase
    assert $SETTINGS['api_token'] != nil
    PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
    assert Story.count() > 0
-   story = Story.find_by_ticket_id($SETTINGS["test_ticket_id"])
+   story = Story.find_by_active_ticket_id($SETTINGS["test_ticket_id"])
    assert (story.name == $SETTINGS["test_ticket_name"])
   end
   
@@ -412,7 +410,7 @@ class MyUnitTests < Test::Unit::TestCase
     end
     incomplete = Story.incomplete()
     assert incomplete.include?(2)
-    story = Story.find_by_ticket_id(2)
+    story = Story.find_by_active_ticket_id(2)
     story.ticket_id=$SETTINGS["test_ticket_id"]
     story.save()
     assert_equal('Unknown story',story.name)
@@ -424,7 +422,7 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_stories_can_be_deleted()
     provide_stories()
-    story = Story.find_by_ticket_id(3)
+    story = Story.find_by_active_ticket_id(3)
     story.delete('2007-08-01') # Delete a story
     story.reload()
     assert_equal(true, story.deleted?)
@@ -439,7 +437,7 @@ class MyUnitTests < Test::Unit::TestCase
     File.open("./test/xml/delete.xml") do |file|
       post '/bucket',file.read()
     end
-    story = Story.find_by_ticket_id(3)
+    story = Story.find_by_active_ticket_id(3)
     story.deleted?
   end
   
@@ -447,20 +445,47 @@ class MyUnitTests < Test::Unit::TestCase
     provide_stories()
     Story.create!(:ticket_id=>$SETTINGS["test_ticket_id"])
     PtApi.flag_deleted_items([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
-    assert Story.find_by_ticket_id(2).deleted?
-    assert Story.find_by_ticket_id(4).deleted?
-    assert Story.find_by_ticket_id(9).deleted?
-    assert !Story.find_by_ticket_id($SETTINGS["test_ticket_id"]).deleted?
+    assert Story.find_by_active_ticket_id(2).deleted?
+    assert Story.find_by_active_ticket_id(4).deleted?
+    assert Story.find_by_active_ticket_id(9).deleted?
+    assert !Story.find_by_active_ticket_id($SETTINGS["test_ticket_id"]).deleted?
   end
   
   def test_scan_for_specific_deleted_stories()
     provide_stories()
     Story.create(:ticket_id=>$SETTINGS["test_ticket_id"])
     PtApi.flag_deleted_items([],$SETTINGS['project_id'],$SETTINGS['api_token'],"2,4,#{$SETTINGS["test_ticket_id"]}")
-    assert Story.find_by_ticket_id(2).deleted?
-    assert Story.find_by_ticket_id(4).deleted?
-    assert !Story.find_by_ticket_id(9).deleted?
-    assert !Story.find_by_ticket_id($SETTINGS["test_ticket_id"]).deleted?
+    assert Story.find_by_active_ticket_id(2).deleted?
+    assert Story.find_by_active_ticket_id(4).deleted?
+    assert !Story.find_by_active_ticket_id(9).deleted?
+    assert !Story.find_by_active_ticket_id($SETTINGS["test_ticket_id"]).deleted?
+  end
+  
+  def test_malformed_posts_fail_cleanly()
+    provide_stories()
+    Story.find_by_active_ticket_id(1).destroy
+    File.open("./test/xml/create.xml") do |file|
+      post '/bucket',file.read()
+    end
+    File.open("./test/xml/accepted.xml") do |file|
+      post '/bucket',file.read()
+    end
+    File.open("./test/xml/start.xml") do |file|
+      post '/bucket',file.read()
+    end
+    File.open("./test/xml/start2.xml") do |file|
+      post '/bucket',file.read()
+    end
+    File.open("./test/xml/nonsense.xml") do |file|
+      post '/bucket',file.read()
+    end
+    File.open("./test/xml/invalid.xml") do |file|
+      post '/bucket',file.read()
+    end
+    story = Story.find_by_active_ticket_id(1)
+    assert_equal('accepted',story.state)
+    assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.accepted)
+    assert_equal(DateTime.parse('2012/02/01 11:05:51 UTC'),story.started)
   end
   
   def teardown
