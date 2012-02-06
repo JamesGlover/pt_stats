@@ -330,15 +330,37 @@ module PtApi
   def self.incomming(xml)
     return nil if xml == '' # Drop empty posts
     data = REXML::Document.new(xml)
-    
-    return nil if data.root == nil || data.root.name != 'activity'  # Drop out if things don't look right
-    return nil if data.elements["activity/project_id "].text != $SETTINGS['project_id'].to_s # Drop out if we have the wrong project
-     
     begin
-      event_type = data.elements["activity/event_type"].text
-      date = DateTime.parse(data.elements["activity/occurred_at"].text)
+      return nil if data.root == nil
       
-      data.elements.each("activity/stories/story") do |rec_story|
+      if data.root.name == 'activity'  # Drop out if things don't look right
+        data.elements.each('activity') do |activity|
+          if activity.elements["project_id "].text == $SETTINGS['project_id'].to_s # Drop out if we have the wrong project
+            parse_incomming(activity)
+          end
+        end
+
+      elsif data.root.name == 'activities'
+        data.elements.each('*/activity') do |activity|
+          if activity.elements["project_id "].text == $SETTINGS['project_id'].to_s # Drop out if we have the wrong project
+            parse_incomming(activity)
+          end
+        end
+      end
+      
+    rescue
+      puts "XML Parsing Failed: #{xml}"
+      return nil
+    end
+    return nil
+  end
+  
+  def self.parse_incomming(data)
+    # begin
+      event_type = data.elements["event_type"].text
+      date = DateTime.parse(data.elements["occurred_at"].text)
+      
+      data.elements.each("stories/story") do |rec_story|
         # For each story: Should only be one
         ticket_id = rec_story.elements["id"].text
         db_story = Story.find_or_create_by_ticket_id(ticket_id)
@@ -351,18 +373,16 @@ module PtApi
            db_story.name = "Unknown story" if db_story.name == nil
            db_story.created = DateTime.parse('01/01/2000') if db_story.created == nil
            db_story.ticket_type = 'unknown' if db_story.ticket_type == nil
-           new_state = rec_story.elements["current_state"].text
-           db_story.update_state(new_state,data.elements["activity/occurred_at"].text)
+           new_state = rec_story.elements["current_state"].text unless rec_story.elements["current_state"] == nil
+           db_story.update_state(new_state,data.elements["occurred_at"].text)
          elsif event_type == 'story_delete'
-           db_story.delete(data.elements["activity/occurred_at"].text)
+           db_story.delete(data.elements["occurred_at"].text)
          end
        end
        
-     rescue
-       puts "XML Parsing Failed: #{xml}"
-       return nil
-     end  
-     return nil
-  end
+     # rescue
+     #   puts "Parsing fails of XML block: #{data}"
+     # end
+   end
     
 end

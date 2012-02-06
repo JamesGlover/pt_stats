@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activities type="array">
+  <activity>
+    <id type="integer">158214691</id>
+    <version type="integer">30</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/06 09:30:35 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;Study the progress of a ticket through the system&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24220815</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+        <accepted_at type="datetime">2012/02/01 00:00:00 UTC</accepted_at>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157703347</id>
+    <version type="integer">29</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:17:19 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover finished &quot;Again!&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421623</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421623</url>
+        <current_state>finished</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157703299</id>
+    <version type="integer">28</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:17:12 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover started &quot;Again!&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421623</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421623</url>
+        <current_state>started</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157703289</id>
+    <version type="integer">27</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/02/03 15:17:10 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;Again!&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421623</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421623</url>
+        <name>Again!</name>
+        <story_type>feature</story_type>
+        <estimate type="integer">3</estimate>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157703207</id>
+    <version type="integer">26</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/02/03 15:16:56 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;More Colour&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421609</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421609</url>
+        <name>More Colour</name>
+        <story_type>feature</story_type>
+        <estimate type="integer">2</estimate>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157702851</id>
+    <version type="integer">25</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:16:03 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover delivered &quot;Colour Test&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421565</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421565</url>
+        <current_state>delivered</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157702845</id>
+    <version type="integer">24</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:16:03 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover finished &quot;Colour Test&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421565</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421565</url>
+        <current_state>finished</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157702837</id>
+    <version type="integer">23</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:15:59 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover started &quot;Colour Test&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421565</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421565</url>
+        <current_state>started</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157702827</id>
+    <version type="integer">22</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 15:15:57 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;Colour Test&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421565</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421565</url>
+        <estimate type="integer">1</estimate>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157702737</id>
+    <version type="integer">21</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/02/03 15:15:45 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;Colour Test&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24421565</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24421565</url>
+        <name>Colour Test</name>
+        <story_type>feature</story_type>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690447</id>
+    <version type="integer">20</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 14:43:06 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover rejected &quot;Reject this&quot; with comments: &quot;Because I want to&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <current_state>rejected</current_state>
+        <notes type="array">
+          <note>
+            <id type="integer">14494789</id>
+            <text>Because I want to</text>
+          </note>
+        </notes>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690359</id>
+    <version type="integer">19</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 14:42:54 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover delivered &quot;Reject this&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <current_state>delivered</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690347</id>
+    <version type="integer">18</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 14:42:52 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover finished &quot;Reject this&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <current_state>finished</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690325</id>
+    <version type="integer">17</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 14:42:49 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover started &quot;Reject this&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <current_state>started</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690319</id>
+    <version type="integer">16</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 14:42:48 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;Reject this&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <estimate type="integer">2</estimate>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157690243</id>
+    <version type="integer">15</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/02/03 14:42:34 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;Reject this&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24419855</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24419855</url>
+        <name>Reject this</name>
+        <story_type>feature</story_type>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157671637</id>
+    <version type="integer">14</version>
+    <event_type>story_delete</event_type>
+    <occurred_at type="datetime">2012/02/03 13:51:22 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover deleted &quot;Will Delete Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24417409</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24417409</url>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157671605</id>
+    <version type="integer">13</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/03 13:51:16 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;Will Delete Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24417409</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24417409</url>
+        <current_state></current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">157671573</id>
+    <version type="integer">12</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/02/03 13:51:06 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;Will Delete Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24417409</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24417409</url>
+        <name>Will Delete Story</name>
+        <story_type>feature</story_type>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156782299</id>
+    <version type="integer">11</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/01 14:56:37 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;New Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24235441</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24235441</url>
+        <estimate type="integer">2</estimate>
+        <current_state>started</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156721735</id>
+    <version type="integer">10</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/01 12:05:34 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover edited &quot;New Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24235441</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24235441</url>
+        <current_state>unstarted</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156721245</id>
+    <version type="integer">8</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/01 12:03:36 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover finished &quot;Study the progress of a ticket through the system&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24220815</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+        <accepted_at type="datetime">2012/02/01 12:03:36 UTC</accepted_at>
+        <current_state>accepted</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156710515</id>
+    <version type="integer">5</version>
+    <event_type>note_create</event_type>
+    <occurred_at type="datetime">2012/02/01 11:21:35 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added comment: &quot;If I add a comment, will we have problems?&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24220815</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+        <notes type="array">
+          <note>
+            <id type="integer">14389611</id>
+            <text>If I add a comment, will we have problems?</text>
+          </note>
+        </notes>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156706491</id>
+    <version type="integer">4</version>
+    <event_type>story_update</event_type>
+    <occurred_at type="datetime">2012/02/01 11:05:51 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover started &quot;Study the progress of a ticket through the system&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24220815</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+        <current_state>started</current_state>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156360727</id>
+    <version type="integer">3</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/01/31 17:09:06 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;New Story&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24235441</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24235441</url>
+        <name>New Story</name>
+        <story_type>feature</story_type>
+        <current_state>unscheduled</current_state>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+  <activity>
+    <id type="integer">156253699</id>
+    <version type="integer">2</version>
+    <event_type>story_create</event_type>
+    <occurred_at type="datetime">2012/01/31 13:37:51 UTC</occurred_at>
+    <author>James Glover</author>
+    <project_id type="integer">466613</project_id>
+    <description>James Glover added &quot;Study the progress of a ticket through the system&quot;</description>
+    <stories type="array">
+      <story>
+        <id type="integer">24220815</id>
+        <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24220815</url>
+        <name>Study the progress of a ticket through the system</name>
+        <story_type>chore</story_type>
+        <description>A ticket that will both be tracked, and fulfill its role at the end of the tracking.</description>
+        <current_state>unscheduled</current_state>
+        <owned_by>James Glover</owned_by>
+        <requested_by>James Glover</requested_by>
+      </story>
+    </stories>
+  </activity>
+</activities>

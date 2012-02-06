@@ -333,7 +333,17 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal('Study the progress of a ticket through the system',story.name)
     assert_equal('created',story.state)
     assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
+  end
   
+  def test_activities_can_be_used_for_population()
+    File.open("./test/xml/activities.xml") do |file|
+      post '/bucket',file.read()
+    end
+    story = Story.find_by_ticket_id(24220815)
+    assert_equal('Study the progress of a ticket through the system',story.name)
+    assert_equal('accepted',story.state)
+    assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
+    assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.accepted)
   end
   
   def test_uncreated_tickets_get_default_data()

@@ -68,7 +68,7 @@ class Story < ActiveRecord::Base
    end
    date = DateTime.parse(date)
    states = ['created','started','finished','delivered','accepted']
-   return false if new_state == 'unstarted'
+   return false unless states.include?(new_state)
    states.each do |s|
      unless self.send(s+'?')
        self.send(s+'=', date)
