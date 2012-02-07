@@ -12,9 +12,23 @@ The key config variables are located in config.yml
 project_id = The ID of the PT project to be tracked
 project_name = The project name: Displayed on the tracking screen
 iteration_length = The Iteration length in weeks
-api_token = the api token (Optional: For security reasons you can provide the API key as needed)
+iteration_seed = The beginning of iteration 1
+api_token = The Pivotal Tracker api token (Optional: For security reasons you can provide the API key as needed)
 test_ticket_id = required to test api links
 test_ticket_name = the name corresponding to the test ticket
 username = the username for access
-password_hash = a bcrypt hashed password (Default is admin)
+hash_password = a bcrypt hashed password (Default is admin)
 bucket_code = adjusts the postbin URL
+proxy = set to auto to use ENV['HTTP_PROXY']
+page_size = the pt_api limits api calls to return at most 3000 stories. Pt_stats will use pagination to cope with large databases. You can adjust the size of each page here.
+pt_api = the URI of the Pivotal Tracker API. You shouldn't need to change this unless the address changes.
+
+
+Alternatively, for ease of code maintenance, you can also use environmental variables, this is especially useful if deploying the same code across multiple projects, see: http://devcenter.heroku.com/articles/config-vars
+If specified, config vars will take precedence over the yaml config.
+
+Config vars are
+BUCKET_CODE, HASH_PASSWORD, USERNAME, PROJECT_ID, PROJECT_NAME, ITERATION_SEED, ITERATION_LENGTH, API_TOKEN
+
+eg. use:
+heroku config:add BUCKET_CODE=secreturl HASH_PASSWORD=bcryptedpassword USERNAME=admin PROJECT_ID=12345 PROJECT_NAME='my project' ITERATION_SEED='2012/01/16 00:00:00 UTC' ITERATION_LENGTH=2 API_TOKEN=optional

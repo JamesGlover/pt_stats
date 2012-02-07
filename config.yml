@@ -1,7 +1,8 @@
 development:
-  project_id: 466613
-  project_name: LIMS - core redesign
-  iteration_length: 2
+  project_id: 455451
+  project_name: Training Project
+  iteration_seed: 2012/01/16 00:00:00 UTC
+  iteration_length: 1
   username: admin
   hash_password: "$2a$10$yj/TB.w.HRiFvUuHs.uaAuD64QGMCrBJIl6fq5MuDuj3qNDrjjhq6"
   proxy: auto
@@ -11,8 +12,9 @@ development:
     
 test:
   project_id: 466613
-  project_name: LIMS - core redesign
-  iteration_length: 2
+  project_name: Test Project
+  iteration_seed: 2012/01/16 00:00:00 UTC
+  iteration_length: 1
   test_ticket_id: 24235441
   test_ticket_name: New Story
   username: admin
@@ -23,13 +25,6 @@ test:
   pt_api: 'http://www.pivotaltracker.com/services/v3/projects/'
   
 production:
-  project_id: 466613
-  project_name: LIMS - core redesign
-  iteration_length: 2
-  username: admin
-  hash_password: "$2a$10$yj/TB.w.HRiFvUuHs.uaAuD64QGMCrBJIl6fq5MuDuj3qNDrjjhq6"
   proxy: auto
-  bucket_code: ''
   page_size: 3000
   pt_api: 'http://www.pivotaltracker.com/services/v3/projects/'
-  

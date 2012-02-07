@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">159891175</id>
+  <version type="integer">46</version>
+  <event_type>story_update</event_type>
+  <occurred_at type="datetime">2012/02/09 11:06:14 UTC</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover edited &quot;What happens with a rename?&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">1</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24693003</url>
+      <name>With a new name</name>
+    </story>
+  </stories>
+</activity>

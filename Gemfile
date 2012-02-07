@@ -10,7 +10,7 @@ gem 'bcrypt-ruby'
 gem "heroku"
 
 group :development do
-  gem "mysql"
+  gem 'pg'
   #gem "activerecord-ruby-mysql-adapter"
 end
 

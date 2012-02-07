@@ -6,20 +6,21 @@ require 'yaml'
 @environment = ENV['RACK_ENV'] || 'development'
 @environment = 'production' if ENV['DATABASE_URL']
 
-require 'activerecord'
 require 'uri'
 
 namespace :db do
   
   task :environment do
     puts "Defining environment"
+    @environment = ENV['RACK_ENV'] || 'development'
+    puts "Environment: #{@environment}"
+    require 'pg'
     require 'active_record'
-    if ['development','test'].include? @environment
-      require 'mysql'
-      ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
-    else
+     if ['development','test'].include? @environment
+    #    require 'mysql'
+    ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
+      else
       require 'uri'
-      require 'pg'
       db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/mydb')
 
       ActiveRecord::Base.establish_connection(

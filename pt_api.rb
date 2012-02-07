@@ -32,7 +32,7 @@ module PtApi
           parse_xml_story(data.root,story_hash)
         else
           puts "XML is invalid or does not match story"
-          puts data
+          #puts data
         end
       end
       
@@ -111,6 +111,7 @@ module PtApi
       hash[:ticket_id] = data.elements["id"].text if hash[:ticket_id]==nil
       hash[:name] = data.elements["name"].text
       hash[:created] = DateTime.parse(data.elements["created_at"].text)
+      hash[:accepted] = DateTime.parse(data.elements["accepted_at"].text) if data.elements["accepted_at"] != nil
       hash[:ticket_type] = data.elements["story_type"].text
       hash[:current_state] = data.elements["current_state"].text
       return true
@@ -121,17 +122,25 @@ module PtApi
   
   def self.create_story(hash)
     begin
-      db_story = Story.find_or_create_by_ticket_id_and_rejected_close(hash[:ticket_id],nil) 
-      db_story.created = hash[:created]
-      db_story.name = hash[:name]
-      db_story.ticket_type = hash[:ticket_type]
-      db_story.save
-      if (hash[:current_state] != 'started')||(hash[:current_state] != 'rejected')
-        db_story.update_state(hash[:current_state],hash[:created].to_s)
-      elsif hash[:current_state] == 'rejected'
-        deb_story.reject(hash[:created].to_s)
+      stories = Story.find_all_by_ticket_id(hash[:ticket_id])
+      if stories.length == 0
+        stories << Story.find_or_create_by_ticket_id(hash[:ticket_id])
       end
-      return db_story
+      stories.each do |db_story| # We'll almost always have just the one.
+        db_story.created = hash[:created]
+        db_story.name = hash[:name]
+        db_story.ticket_type = hash[:ticket_type]
+        db_story.save
+        if ['rejected'].include?(hash[:current_state])
+          db_story.reject(hash[:created])
+        elsif ['accepted'].include?(hash[:current_state])
+           hash[:accepted]=hash[:created] if hash[:accepted] == nil
+           db_story.update_state(hash[:current_state],hash[:accepted])
+        elsif ['started','finished','delivered'].include?(hash[:current_state])
+          db_story.update_state(hash[:current_state],hash[:created])
+        end
+        db_story
+      end
     rescue # Just in case
       return false
     end
@@ -187,7 +196,7 @@ module PtApi
   end
   
   def self.populate_database(messages,id,api,id_list)
-    
+
     con_list ='all'
     task = 0
     if id_list !='all'
@@ -236,7 +245,7 @@ module PtApi
     task = 2  
     data = paginate(messages,id,api,con_list,0,task)
     if con_list=='all'
-      id_list = Story.total.map do |story|
+      id_list = Story.total(0).map do |story|
         story.ticket_id().to_s
       end
     else
@@ -269,22 +278,22 @@ module PtApi
         deleted = []
         id_list.each do |id|
           if !found_ids.include?(id)
-            Story.find_by_active_ticket_id(id).delete(Time.new.to_s)
+            Story.find_last_by_ticket_id(id).delete(Time.new.to_s)
             deleted << id
           end
         end
       rescue
-              puts "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
-              bod = "A problem occured while deleting stories.<br/>"
-              bod << "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
-              messages << {
-                :id => 'deletion_failure',
-                :classes => 'bad',
-                :title => 'Error: Problems deleting stories',
-                :body => bod
-              }
-              return false
-            end
+                    puts "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
+                    bod = "A problem occured while deleting stories.<br/>"
+                    bod << "<strong>Tested:</strong> #{scanned} <strong>Against:</strong> #{total} <strong>Flagged deleted:</strong> #{deleted.length}"
+                    messages << {
+                      :id => 'deletion_failure',
+                      :classes => 'bad',
+                      :title => 'Error: Problems deleting stories',
+                      :body => bod
+                    }
+                    return false
+                  end
       messages << {
         :id => 'stories_deleted',
         :classes => 'good',
@@ -363,16 +372,32 @@ module PtApi
       data.elements.each("stories/story") do |rec_story|
         # For each story: Should only be one
         ticket_id = rec_story.elements["id"].text
-        db_story = Story.find_or_create_by_ticket_id_and_rejected_close(ticket_id,nil)
+        ticket_stack = Story.where('ticket_id=?',ticket_id).order('rejected ASC')
+        if ticket_stack.length == 0
+          db_story = Story.find_or_create_by_ticket_id(ticket_id)
+        elsif ticket_stack.length == 1
+          db_story=ticket_stack[0]
+        else
+          ticket_stack.each do |ticket|
+            if ticket.rejected == nil
+              db_story=ticket
+            elsif date < ticket.rejected
+              db_story=ticket
+              break
+            end
+          end
+        end
         if event_type =='story_create'
           db_story.name = rec_story.elements["name"].text
           db_story.created = date
           db_story.ticket_type = rec_story.elements["story_type"].text
           db_story.save
          elsif event_type == 'story_update'
-           db_story.name = "Unknown story" if db_story.name == nil
-           db_story.created = nil if db_story.created == nil
-           db_story.ticket_type = 'unknown' if db_story.ticket_type == nil
+           db_story.name = "Unknown story" if db_story.name == nil && rec_story.elements["name"] == nil
+           db_story.name = rec_story.elements["name"].text if rec_story.elements["name"] != nil
+           db_story.ticket_type = 'unknown' if db_story.ticket_type == nil && rec_story.elements["story_type"] == nil
+           db_story.ticket_type = rec_story.elements["story_type"].text if rec_story.elements["story_type"] != nil
+           db_story.save()
            new_state = rec_story.elements["current_state"].text unless rec_story.elements["current_state"] == nil
            db_story.update_state(new_state,data.elements["occurred_at"].text)
          elsif event_type == 'story_delete'

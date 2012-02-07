@@ -1,17 +1,12 @@
+common: &common
+  adapter: postgresql
+  username: pt_stats
+  password: pt_stats
+
 development:
-  adapter: mysql
-  database: pt_stories
-  username: root
-  password:
-  port: 3306
+  <<: *common
+  database: pt_stories_dev
   
 test:
-  adapter: mysql
-  database: pt_stories
-  username: root
-  password:
-  port: 3306
-  
-production:
-  adapter: postgresql
-  encoding: unicode
+  <<: *common
+  database: pt_stories_test

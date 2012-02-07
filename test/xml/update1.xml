@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">159890741</id>
+  <version type="integer">45</version>
+  <event_type>story_update</event_type>
+  <occurred_at type="datetime">2012/02/09 11:04:56 UTC</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover edited &quot;Testing that PT Stas Doesn't show this!&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">1</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/466613/stories/24693003</url>
+      <story_type>bug</story_type>
+      <estimate type="integer">-1</estimate>
+    </story>
+  </stories>
+</activity>
