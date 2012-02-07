@@ -65,4 +65,14 @@ module Helpers
     
   end
   
+  def clean_date(date)
+    if date.class == String
+      return DateTime.parse(date)
+    elsif date.class == DateTime
+      return date
+    else
+      return nil
+    end
+  end
+  
 end

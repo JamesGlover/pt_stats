@@ -188,10 +188,11 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(false,Story.find_by_active_ticket_id(1).rejected_open?)
   end
   
-  def test_reject_clears_states()
+  def test_reject_provides_new_story()
     provide_stories()
     assert_equal(0,Story.find_by_active_ticket_id(6).rejection_count)
     Story.find_by_active_ticket_id(6).reject("2014/01/31 13:37:51 UTC")
+    assert_equal(2,Story.find_all_by_ticket_id(6).length)
     assert_equal("rejected",Story.find_by_active_ticket_id(6).state)
     assert_equal(true,Story.find_by_active_ticket_id(6).created?)
     assert_equal(false,Story.find_by_active_ticket_id(6).started?)
@@ -199,8 +200,29 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(false,Story.find_by_active_ticket_id(6).delivered?)
     assert_equal(false,Story.find_by_active_ticket_id(6).accepted?)
     assert_equal(1,Story.find_by_active_ticket_id(6).rejection_count)
+    assert Story.where("rejected_close IS NOT NULL").first.finished?
     Story.find_by_active_ticket_id(6).reject("2015/01/31 13:37:51 UTC")
+    assert_equal(3,Story.find_all_by_ticket_id(6).length)
     assert_equal(2,Story.find_by_active_ticket_id(6).rejection_count)
+  end
+  
+  def test_delayed_tickets_on_rejected_stories()
+    original = Story.create(
+    :ticket_id=>1,
+    :name => 'foo',
+    :created => '1983-01-31 [14:31:32]',
+    :ticket_type => 'bug')
+    original.update_state("started","01/01/2000")
+    original.reject("01/12/2000")
+    second = Story.find_by_active_ticket_id(1)
+    second.update_state("finished","01/06/2000")
+    original.reload()
+    second.reload()
+    assert_equal(true,original.rejected_close?)
+    assert_equal(true,original.finished?)
+    assert_equal(true,second.rejected_open?)
+    assert_equal(false,second.finished?)
+    assert_equal(false,second.started?)
   end
   
   def provide_stories()
@@ -351,7 +373,7 @@ class MyUnitTests < Test::Unit::TestCase
     story = Story.find_by_active_ticket_id(2)
     assert_equal('Unknown story',story.name)
     assert_equal('started',story.state)
-    assert_equal(DateTime.parse('01/01/2000'),story.created)
+    assert_equal(nil,story.created)
     assert_equal(DateTime.parse('2012/02/01 14:56:37 UTC'),story.started)
     assert_equal('unknown',story.ticket_type)
   end
@@ -384,7 +406,7 @@ class MyUnitTests < Test::Unit::TestCase
       Story.create!( # Create story with placeholders
         :ticket_id => ticket_id,
         :name => "Unknown story",
-        :created => DateTime.parse('01/01/2000'),
+        :created => nil,
         :ticket_type => 'unknown'
         )
       end

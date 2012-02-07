@@ -45,8 +45,8 @@ class Story < ActiveRecord::Base
  end
  
  def self.incomplete()
-   incomplete = self.where("name = :name OR ticket_type = :type OR created = :date  AND deleted IS NULL",
-   {:name => 'Unknown Story', :type => 'unknown', :date=> DateTime.parse('01/01/2000')})
+   incomplete = self.where("name = :name OR ticket_type = :type OR created IS NULL AND deleted IS NULL",
+   {:name => 'Unknown Story', :type => 'unknown'})
    incomplete.map do |story|
      story.ticket_id
    end
@@ -69,18 +69,24 @@ class Story < ActiveRecord::Base
  end
  
  def update_state(new_state,date)
+   date = Helpers.clean_date(date)
    if new_state=='rejected'
      return self.reject(date)
    end
-   date = DateTime.parse(date)
    states = ['created','started','finished','delivered','accepted']
    return false unless states.include?(new_state)
+   if (self.rejected_open? && date < self.rejected_open) # The story is rejected, but the event occured before rejection
+     previous_story = Story.where("ticket_id = ? and rejected_close = ?",self.ticket_id,self.rejected_open).first
+     previous_story.update_state(new_state,date)
+     return false
+   end
    self.send(new_state+'=', date)
    self.save
  end
  
  def reject(date)
-   self.rejected_close= DateTime.parse(date)
+   date = Helpers.clean_date(date)
+   self.rejected_close= date
    self.rejection_count = self.rejection_count() + 1
    self.save
    Story.create!(
@@ -88,13 +94,14 @@ class Story < ActiveRecord::Base
     :name=>self.name,
     :ticket_type=>self.ticket_type,
     :created=>self.created,
-    :rejected_open=>DateTime.parse(date),
+    :rejected_open=>date,
     :rejection_count=>self.rejection_count()
     )
  end
  
  def delete(date)
-   self.deleted= DateTime.parse(date)
+   date = Helpers.clean_date(date)
+   self.deleted= date
    self.save
  end
  

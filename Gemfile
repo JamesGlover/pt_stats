@@ -9,6 +9,7 @@ gem 'rack-test'
 gem 'bcrypt-ruby'
 
 group :development do
+  gem "heroku"
   gem "mysql"
   #gem "activerecord-ruby-mysql-adapter"
 end

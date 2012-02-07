@@ -23,7 +23,7 @@ module PtApi
         :ticket_id => id,
         :name => "Unknown story",
         :ticket_type => "unknown",
-        :created => DateTime.parse("01/01/2000")
+        :created => nil
       }
       if data==nil
         # Do nothing
@@ -371,7 +371,7 @@ module PtApi
           db_story.save
          elsif event_type == 'story_update'
            db_story.name = "Unknown story" if db_story.name == nil
-           db_story.created = DateTime.parse('01/01/2000') if db_story.created == nil
+           db_story.created = nil if db_story.created == nil
            db_story.ticket_type = 'unknown' if db_story.ticket_type == nil
            new_state = rec_story.elements["current_state"].text unless rec_story.elements["current_state"] == nil
            db_story.update_state(new_state,data.elements["occurred_at"].text)
