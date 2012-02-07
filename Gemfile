@@ -7,13 +7,13 @@ gem 'rake'
 gem 'rack'
 gem 'rack-test'
 gem 'bcrypt-ruby'
+gem "heroku"
 
 group :development do
-  gem "heroku"
   gem "mysql"
   #gem "activerecord-ruby-mysql-adapter"
 end
 
 group :deployment do
-  gem 'pg', '0.10.0'
+  gem 'pg'
 end

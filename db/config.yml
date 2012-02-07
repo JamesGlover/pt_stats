@@ -11,3 +11,7 @@ test:
   username: root
   password:
   port: 3306
+  
+production:
+  adapter: postgresql
+  encoding: unicode

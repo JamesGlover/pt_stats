@@ -4,14 +4,34 @@ require 'yaml'
 
 #require 'sinatra/activerecord/rake'
 @environment = ENV['RACK_ENV'] || 'development'
+@environment = 'production' if ENV['DATABASE_URL']
+
+require 'activerecord'
+require 'uri'
 
 namespace :db do
   
   task :environment do
     puts "Defining environment"
     require 'active_record'
-    require 'mysql'
-    ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
+    if ['development','test'].include? @environment
+      require 'mysql'
+      ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
+    else
+      require 'uri'
+      require 'pg'
+      db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/mydb')
+
+      ActiveRecord::Base.establish_connection(
+        :adapter  => db.scheme == 'postgres' ? 'postgresql' : db.scheme,
+        :host     => db.host,
+        :username => db.user,
+        :password => db.password,
+        :database => db.path[1..-1],
+        :encoding => 'utf8'
+      )
+    end
+
   end
   
   desc "Migrate the database"

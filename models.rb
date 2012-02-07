@@ -2,8 +2,30 @@ require 'active_record'
 require 'yaml'
 
 @environment = ENV['RACK_ENV'] || 'development'
-ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
+@environment = 'production' if ENV['DATABASE_URL']
 
+if ENV['DATABASE_URL']
+  require 'uri'
+  require 'pg'
+  db = URI.parse(ENV['DATABASE_URL'] || 'postgres://localhost/mydb')
+
+  ActiveRecord::Base.establish_connection(
+    :adapter  => db.scheme == 'postgres' ? 'postgresql' : db.scheme,
+    :host     => db.host,
+    :username => db.user,
+    :password => db.password,
+    :database => db.path[1..-1],
+    :encoding => 'utf8'
+  )
+else
+  ActiveRecord::Base.establish_connection(YAML::load(File.open('./db/config.yml'))[@environment])
+end
+
+if ['development','test'].include? @environment
+  require 'mysql'
+else
+  require 'pg'
+end
 
 class Story < ActiveRecord::Base
  #validates_uniqueness_of :ticket_id

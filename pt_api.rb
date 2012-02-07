@@ -43,10 +43,10 @@ module PtApi
   def self.fetch_xml(uri,api_key)
     @retried = false
     
-    if $SETTINGS['proxy']=='auto'
+    if $SETTINGS['proxy']=='auto' && ENV['HTTP_PROXY']!=nil
       proxy = URI.parse(ENV['HTTP_PROXY'])
       proxy_class = Net::HTTP::Proxy(proxy.host,proxy.port)
-    elsif $SETTINGS['proxy']
+    elsif $SETTINGS['proxy'] && ENV['HTTP_PROXY']!=nil
       proxy = URI.parse($SETTINGS['proxy'])
       proxy_class = Net::HTTP::Proxy(proxy.host,proxy.port)
     else
