@@ -866,6 +866,7 @@ class MyUnitTests < Test::Unit::TestCase
        assert Story.count() > 0
        story = Story.find_last_by_ticket_id($SETTINGS["test_ticket_id"])
        assert_equal($SETTINGS["test_ticket_name"],story.name)
+       assert story.created?
       end
       
       def test_incomplete_tickets_returns_incomplete_tickets()
