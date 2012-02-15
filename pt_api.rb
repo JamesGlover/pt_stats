@@ -4,42 +4,6 @@ module PtApi
   require 'net/http'
   require 'uri'
   
-
-  def self.fetch_story(id)
-      
-      if (!test?) || (test? && id!='2')
-        resource_uri = URI.parse("http://www.pivotaltracker.com/services/v3/projects/#{$SETTINGS["project_id"]}/stories/#{id}")
-        data = fetch_xml(resource_uri)
-      else
-          begin
-            file = File.open("./test/xml/returned.xml")
-            data = REXML::Document.new(file.read())
-          ensure
-            file.close()
-          end
-      end
-      
-      story_hash = { # Create a hash with out default data
-        :ticket_id => id,
-        :name => "Unknown story",
-        :ticket_type => "unknown",
-        :created => nil
-      }
-      if data==nil
-        # Do nothing
-      else
-        if check_xml(data,id)
-          parse_xml_story(data.root,story_hash)
-        else
-          puts "XML is invalid or does not match story"
-          #puts data
-        end
-      end
-      
-      db_story = create_story(story_hash,id)
-      return db_story # Explicity for future reference 
-    end
-  
   def self.fetch_xml(uri,api_key)
     @retried = false
     
@@ -120,30 +84,30 @@ module PtApi
     end
   end
   
-  def self.create_story(hash)
-    begin
-      stories = Story.find_all_by_ticket_id(hash[:ticket_id])
+  def PtApi.create_story(hash)
+
+      stories = Story.find_all_by_ticket_id(hash[:ticket_id], :order=>'id')
       if stories.length == 0
         stories << Story.find_or_create_by_ticket_id(hash[:ticket_id])
       end
-      stories.each do |db_story| # We'll almost always have just the one.
-        db_story.created = hash[:created]
-        db_story.name = hash[:name]
-        db_story.ticket_type = hash[:ticket_type]
+      stories.each do |db_story| # Repair name and created for all
+        db_story.created = hash[:created] if db_story.created = nil
+        db_story.name = hash[:name] if db_story.name == 'Unknown story' || db_story.name == nil
+        db_story.ticket_type = hash[:ticket_type] if db_story.ticket_type == 'unknown' || db_story.ticket_type == nil
         db_story.save
-        if ['rejected'].include?(hash[:current_state])
-          db_story.reject(hash[:created])
-        elsif ['accepted'].include?(hash[:current_state])
-           hash[:accepted]=hash[:created] if hash[:accepted] == nil
-           db_story.update_state(hash[:current_state],hash[:accepted])
-        elsif ['started','finished','delivered'].include?(hash[:current_state])
-          db_story.update_state(hash[:current_state],hash[:created])
-        end
-        db_story
       end
-    rescue # Just in case
-      return false
-    end
+      db_story = stories.last # Now work with just the most recent
+      if ['rejected'].include?(hash[:current_state])
+        puts "rejecting"
+        db_story.reject(hash[:created])
+      elsif ['accepted'].include?(hash[:current_state])
+         hash[:accepted]=hash[:created] if hash[:accepted] == nil
+         db_story.update_state(hash[:current_state],hash[:accepted])
+      elsif ['started','finished','delivered'].include?(hash[:current_state])
+        db_story.update_state(hash[:current_state],hash[:created])
+      end
+      db_story
+
   end
   
   def self.paginate(messages,id,api,con_list,page,task)
