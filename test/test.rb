@@ -99,16 +99,6 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal '', last_response.body
   end
   
-  def test_tickets_must_have_unique_ticket_id()
-    assert_raise(ActiveRecord::RecordInvalid) do
-      Story.create!(:name=>'foo')
-    end
-    Story.create!(:ticket_id=>1)
-    assert_raise(ActiveRecord::RecordInvalid) do
-      Story.create!(:ticket_id=>1)
-    end
-  end
-  
   def test_stories_can_be_created_and_retrieved()
     Story.create!(
     :ticket_id=>1,
@@ -273,7 +263,6 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '2012-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>7,
-    :created => '2012-02-09 [14:31:32]',
     :started => '2012-02-09 [14:31:37]')
     Story.create!(
     :ticket_id=>8,
@@ -284,7 +273,6 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '2012-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>8,
-    :created => '2012-02-09 [14:31:32]',
     :started => '2036-01-04 [12:23:11]')
     Story.create!(
     :ticket_id=>11,
@@ -414,7 +402,6 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>3,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2036-02-09 [14:31:33]',
     :finished => '2036-02-09 [14:31:34]',
     :delivered => '2036-02-09 [14:31:35]')
@@ -431,7 +418,6 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>5,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2036-02-09 [14:31:33]',
     :finished=> '2036-02-09 [14:31:34]')
     Story.create!(
@@ -440,12 +426,10 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>6,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1666-02-09 [14:31:33]',
     :rejected => '1667-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>6,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2036-02-09 [14:31:33]')
     Story.create!(
     :ticket_id=>7,
@@ -453,12 +437,10 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>7,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1666-02-09 [14:31:33]',
     :rejected => '1667-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>7,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2012-02-09 [14:31:33]')
     # Totals
     assert_equal(0,Story.created(0).length, "With: #{Story.created(0).inspect}")
@@ -488,21 +470,18 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>1,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1566-02-09 [14:31:33]',
     :finished => '1566-02-09 [14:31:34]',
     :delivered => '1566-02-09 [14:31:35]',
     :rejected => '1566-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>1,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1666-02-09 [14:31:33]',
     :finished => '1666-02-09 [14:31:34]',
     :delivered => '1666-02-09 [14:31:35]',
     :rejected => '1666-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>1,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1766-02-09 [14:31:33]',
     :finished => '1766-02-09 [14:31:34]',
     :delivered => '1766-02-09 [14:31:35]',
@@ -516,28 +495,24 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>2,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1566-02-09 [14:31:33]',
     :finished => '1566-02-09 [14:31:34]',
     :delivered => '1566-02-09 [14:31:35]',
     :rejected => '1566-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>2,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1666-02-09 [14:31:33]',
     :finished => '1666-02-09 [14:31:34]',
     :delivered => '1666-02-09 [14:31:35]',
     :rejected => '1666-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>2,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1766-02-09 [14:31:33]',
     :finished => '1766-02-09 [14:31:34]',
     :delivered => '1766-02-09 [14:31:35]',
     :rejected => '2012-02-09 [14:31:33]')
     Story.create!(
     :ticket_id=>2,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2012-02-09 [14:33:33]')
     Story.create!(
     :ticket_id=>3,
@@ -548,28 +523,24 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '1066-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>3,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1566-02-09 [14:31:33]',
     :finished => '1566-02-09 [14:31:34]',
     :delivered => '1566-02-09 [14:31:35]',
     :rejected => '1566-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>3,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1666-02-09 [14:31:33]',
     :finished => '1666-02-09 [14:31:34]',
     :delivered => '1666-02-09 [14:31:35]',
     :rejected => '1666-02-09 [14:31:36]')
     Story.create!(
     :ticket_id=>3,
-    :created => '1066-02-09 [14:31:32]',
     :started => '1766-02-09 [14:31:33]',
     :finished => '1766-02-09 [14:31:34]',
     :delivered => '1766-02-09 [14:31:35]',
     :rejected => '2012-02-09 [14:31:33]')
     Story.create!(
     :ticket_id=>3,
-    :created => '1066-02-09 [14:31:32]',
     :started => '2032-02-09 [14:33:33]')
     # Totals
     assert_equal(0,Story.created(0).length, "With: #{Story.created(0).inspect}")
@@ -619,7 +590,12 @@ class MyUnitTests < Test::Unit::TestCase
       end
       
       def test_update_state_updates_state()
-        provide_stories()
+        Story.create!(
+        :ticket_id=>1,
+        :name => 'foo',
+        :created => '2012-01-31 [14:31:32]',
+        :ticket_type => 'bug')
+        
         assert_equal("created",Story.find_last_by_ticket_id(1).state)
         Story.find_last_by_ticket_id(1).update_state("started","2013/01/31 13:37:51 UTC")
         assert_equal("started",Story.find_last_by_ticket_id(1).state)
@@ -629,6 +605,14 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(false,Story.find_last_by_ticket_id(1).delivered?)
         assert_equal(false,Story.find_last_by_ticket_id(1).accepted?)
         assert_equal(false,Story.find_last_by_ticket_id(1).rejected?)
+        assert_equal(1,Story.total(0).length)
+        assert_equal(1,Story.count)
+        assert_equal(0,Story.created(0).length)
+        assert_equal(1,Story.started(0).length)
+        assert_equal(0,Story.finished(0).length)
+        assert_equal(0,Story.delivered(0).length)
+        assert_equal(0,Story.accepted(0).length)
+        assert_equal(0,Story.rejected(0).length)
         
         # Check we can skip a stage (In case we miss an update)
         Story.find_last_by_ticket_id(1).update_state("delivered","2014/01/31 13:37:51 UTC")
@@ -639,16 +623,57 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(true,Story.find_last_by_ticket_id(1).delivered?)
         assert_equal(false,Story.find_last_by_ticket_id(1).accepted?)
         assert_equal(false,Story.find_last_by_ticket_id(1).rejected?)
+        assert_equal(1,Story.total(0).length)
+        assert_equal(1,Story.count)
+        assert_equal(0,Story.created(0).length)
+        assert_equal(0,Story.started(0).length)
+        assert_equal(0,Story.finished(0).length)
+        assert_equal(1,Story.delivered(0).length)
+        assert_equal(0,Story.accepted(0).length)
+        assert_equal(0,Story.rejected(0).length)
         
-        # Check that we can't go back a stage
-        Story.find_last_by_ticket_id(1).update_state("started","2014/01/31 13:37:51 UTC")
-        assert_equal("delivered",Story.find_last_by_ticket_id(1).state)
-        assert_equal(true,Story.find_last_by_ticket_id(1).created?)
-        assert_equal(true,Story.find_last_by_ticket_id(1).started?)
-        assert_equal(false,Story.find_last_by_ticket_id(1).finished?)
-        assert_equal(true,Story.find_last_by_ticket_id(1).delivered?)
-        assert_equal(false,Story.find_last_by_ticket_id(1).accepted?)
-        assert_equal(false,Story.find_last_by_ticket_id(1).rejected?)
+        # Check that we can't go back a stage on old events
+        Story.find_last_by_ticket_id(1).update_state("finished","2014/01/31 13:37:50 UTC")
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal("delivered",story.state)
+        assert_equal(true,story.created?)
+        assert_equal(true,story.started?)
+        assert_equal(true,story.finished?)
+        assert_equal(true,story.delivered?)
+        assert_equal(false,story.accepted?)
+        assert_equal(false,story.rejected?)
+        assert_equal(DateTime.parse("2014/01/31 13:37:50 UTC"),story.finished)
+        assert_equal(1,Story.total(0).length)
+        assert_equal(1,Story.count)
+        assert_equal(0,Story.created(0).length)
+        assert_equal(0,Story.started(0).length)
+        assert_equal(0,Story.finished(0).length)
+        assert_equal(1,Story.delivered(0).length)
+        assert_equal(0,Story.accepted(0).length)
+        assert_equal(0,Story.rejected(0).length)
+        
+        # Check that we do go back a stage on NEW events
+        Story.find_last_by_ticket_id(1).update_state("finished","2014/01/31 13:37:51 UTC")
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal("finished",story.state)
+        assert_equal(false,story.created?)
+        assert_equal(false,story.started?)
+        assert_equal(true,story.finished?)
+        assert_equal(false,story.delivered?)
+        assert_equal(false,story.accepted?)
+        assert_equal(false,story.rejected?)
+        #assert_equal(DateTime.parse("2012-01-31 [14:31:32]"),story.created)
+        #assert_equal(DateTime.parse("2013/01/31 13:37:51 UTC"),story.started)
+        assert_equal(DateTime.parse("2014/01/31 13:37:51 UTC"),story.finished)
+        assert_equal(1,Story.total(0).length)
+        assert_equal(2,Story.count)
+        assert_equal(0,Story.created(0).length)
+        assert_equal(0,Story.started(0).length)
+        assert_equal(1,Story.finished(0).length)
+        assert_equal(0,Story.delivered(0).length)
+        assert_equal(0,Story.accepted(0).length)
+        assert_equal(0,Story.rejected(0).length)
+
       end
       
       def test_starting_rejected_stories_provides_new_story()
@@ -659,7 +684,7 @@ class MyUnitTests < Test::Unit::TestCase
         Story.find_last_by_ticket_id(6).update_state('started','2014/06/03')
         assert_equal(2,Story.find_all_by_ticket_id(6).length)
         assert_equal("started",Story.find_last_by_ticket_id(6).state)
-        assert_equal(true,Story.find_last_by_ticket_id(6).created?)
+        assert_equal(false,Story.find_last_by_ticket_id(6).created?)
         assert_equal(true,Story.find_last_by_ticket_id(6).started?)
         assert_equal(false,Story.find_last_by_ticket_id(6).finished?)
         assert_equal(false,Story.find_last_by_ticket_id(6).delivered?)
@@ -1183,7 +1208,6 @@ class MyUnitTests < Test::Unit::TestCase
         :rejected => '2012-02-09 [14:31:36]')
         Story.create!(
         :ticket_id=>7, :ticket_type => 'bug',
-        :created => '2012-02-09 [14:31:32]',
         :started => '2012-02-09 [14:31:37]')
         Story.create!(
         :ticket_id=>8, :ticket_type => 'bug',
@@ -1194,7 +1218,6 @@ class MyUnitTests < Test::Unit::TestCase
         :rejected => '2012-02-09 [14:31:36]')
         Story.create!(
         :ticket_id=>8, :ticket_type => 'bug',
-        :created => '2012-02-09 [14:31:32]',
         :started => '2036-01-04 [12:23:11]')
         Story.create!(
         :ticket_id=>11, :ticket_type => 'bug',
@@ -1263,7 +1286,7 @@ class MyUnitTests < Test::Unit::TestCase
       
       def test_select_latest()
         Story.create!(:id => 12, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:45", :started => nil, :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-07 16:43:45", :deleted => nil, :ticket_type => "feature")
-        Story.create!(:id => 17, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:46", :started=> "2012-02-09 10:50:16", :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-09 10:50:46", :deleted => nil, :ticket_type => "feature")
+        Story.create!(:id => 17, :ticket_id => 24579125, :name => "newer story", :created => "2012-02-07 16:43:45", :started=> "2012-02-09 10:50:16", :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-09 10:50:46", :deleted => nil, :ticket_type => "feature")
         File.open("./test/xml/odd_bug.xml") do |file|
           post '/bucket',file.read()
         end
@@ -1271,8 +1294,168 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(0,Story.rejected(0).length)
         assert_equal(3,Story.count())
         assert_equal(1,Story.started(0).length)
-        assert_equal(DateTime.parse("2012-02-07 16:43:46"),n.created())
+        assert_equal("newer story", n.name())
         assert_equal('started',n.state())
+      end
+      
+      def test_iteration_counts_on_edited_tickets()
+        current_iteration = ['2012-02-09 [14:31:32]','2012-02-09 [14:31:33]','2012-02-09 [14:31:34]','2012-02-09 [14:31:35]','2012-02-09 [14:31:36]']
+        previous_iteration = ['2012-02-01 [14:31:32]','2012-02-01 [14:31:33]','2012-02-01 [14:31:34]','2012-02-01 [14:31:35]','2012-02-01 [14:31:36]']
+        subsequent_iteration = ['2012-02-15 [14:31:32]','2012-02-15 [14:31:33]','2012-02-15 [14:31:34]','2012-02-15 [14:31:35]','2012-02-15 [14:31:36]']
+        
+        a = Story.create!(
+        :ticket_id=>1,
+        :created => current_iteration[0])
+        
+        a.update_state('started', current_iteration[1] )
+        
+        a.reload()
+        assert_equal('started',a.state())
+        assert_equal([0,1,0,0,0,0,1,1],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,1],it_array(4))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', current_iteration[1] )
+
+        b.reload()
+        assert_equal('started',b.state())
+        assert_equal([0,1,0,0,0,0,1,1],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,1],it_array(4))
+        assert_equal([1,0,0,0,0,0,0,1],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', current_iteration[1] )
+        b.update_state('started', current_iteration[1] )
+
+        b.reload()
+        assert_equal('started',b.state())
+        assert_equal([0,1,0,0,0,0,1,1],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,1],it_array(4))
+        assert_equal([1,0,0,0,0,0,0,1],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', previous_iteration[1] )
+        b.update_state('finished', previous_iteration[2] )
+        b.update_state('started', current_iteration[1] )
+
+        b.reload()
+        assert_equal('finished',b.state())
+        assert_equal([0,1,0,0,0,0,1,2],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,2],it_array(4))
+        assert_equal([0,0,1,0,0,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', previous_iteration[1] )
+        b.update_state('finished', previous_iteration[2] )
+        b.update_state('started', subsequent_iteration[1] )
+
+        b.reload()
+        assert_equal('finished',b.state())
+        assert_equal([0,1,0,0,0,0,1,2],it_array(0))
+        assert_equal([0,0,1,0,0,0,1,2],it_array(4))
+        assert_equal([0,0,1,0,0,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', previous_iteration[1] )
+        b.update_state('finished', previous_iteration[2] )
+        b.update_state('delivered', previous_iteration[2] )
+        b.update_state('finished', subsequent_iteration[1] )
+
+        b.reload()
+        assert_equal('delivered',b.state())
+        assert_equal([0,0,1,0,0,0,1,2],it_array(0))
+        assert_equal([0,0,0,1,0,0,1,2],it_array(4))
+        assert_equal([0,0,0,1,0,0,1,2],it_array(3)) # Error here
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', previous_iteration[1] )
+        b.update_state('finished', previous_iteration[2] )
+        b.update_state('delivered', previous_iteration[3] )
+        b.update_state('accepted', previous_iteration[4] )
+        b.update_state('delivered', current_iteration[1] )
+
+        b.reload()
+        assert_equal('accepted',b.state())
+        assert_equal([0,0,0,1,0,0,1,2],it_array(0))
+        assert_equal([0,0,0,1,0,0,1,2],it_array(4))
+        assert_equal([0,0,0,0,1,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('accepted', previous_iteration[1] )
+        b.update_state('started', previous_iteration[2] )
+
+        b.reload()
+        assert_equal('accepted',b.state())
+        assert_equal([0,1,0,0,0,0,1,2],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,2],it_array(4))
+        assert_equal([0,1,0,0,1,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+
+        b.update_state('started', previous_iteration[1] )
+        b.update_state('finished', previous_iteration[2] )
+        b.update_state('delivered', previous_iteration[3] )
+        b.update_state('accepted', previous_iteration[4] )
+        b.update_state('finished', current_iteration[1] )
+
+        b.reload()
+        assert_equal('accepted',b.state())
+        assert_equal([0,0,1,0,0,0,1,2],it_array(0))
+        assert_equal([0,0,1,0,0,0,1,2],it_array(4))
+        assert_equal([0,0,0,0,1,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+      end
+      
+      def it_array(i)
+        [ Story.created(i).length,
+          Story.started(i).length,
+          Story.finished(i).length,
+          Story.delivered(i).length,
+          Story.accepted(i).length,
+          Story.rejected(i).length,
+          Story.total(i).length,
+          Story.count]
       end
     
   def teardown
