@@ -180,7 +180,7 @@ module PtApi
           # For each Story
           hash ={}
           parse_error = parse_error+1 unless parse_xml_story(story,hash)
-          id_list.delete(hash[:ticket_id]) if id_list!='all'
+          id_list.delete(hash[:ticket_id].to_i) if id_list!='all'
           if create_story(hash)==false
             create_error = create_error + 1
           else
@@ -314,7 +314,7 @@ module PtApi
         end
 
       elsif data.root.name == 'activities'
-        data.elements.each('*/activity') do |activity|
+        data.root.elements.to_a('activity').reverse.each do |activity| # Reverse so events are processed in date order
           if activity.elements["project_id "].text == $SETTINGS['project_id'].to_s # Drop out if we have the wrong project
             parse_incomming(activity)
           end
@@ -329,28 +329,18 @@ module PtApi
   end
   
   def self.parse_incomming(data)
-    # begin
+    begin
       event_type = data.elements["event_type"].text
       date = DateTime.parse(data.elements["occurred_at"].text)
       
       data.elements.each("stories/story") do |rec_story|
         # For each story: Should only be one
         ticket_id = rec_story.elements["id"].text
-        ticket_stack = Story.where('ticket_id=?',ticket_id).order('rejected ASC')
-        if ticket_stack.length == 0
-          db_story = Story.find_or_create_by_ticket_id(ticket_id)
-        elsif ticket_stack.length == 1
-          db_story=ticket_stack[0]
-        else
-          ticket_stack.each do |ticket|
-            if ticket.rejected == nil
-              db_story=ticket
-            elsif date < ticket.rejected
-              db_story=ticket
-              break
-            end
-          end
-        end
+        
+        # =>       # The earliest rejected ticket that postdates the event, or the active ticket                          OR  the most recent reject
+        db_story = Story.where('ticket_id=? AND (rejected > ? OR rejected IS NULL)',ticket_id, date).order('id ASC').first || Story.find_last_by_ticket_id(ticket_id)
+        db_story = Story.create!(:ticket_id => ticket_id) if db_story == nil
+        
         if event_type =='story_create'
           db_story.name = rec_story.elements["name"].text
           db_story.created = date
@@ -369,9 +359,9 @@ module PtApi
          end
        end
        
-     # rescue
-     #   puts "Parsing fails of XML block: #{data}"
-     # end
+     rescue
+       puts "Parsing fails of XML block: #{data}"
+     end
    end
     
 end

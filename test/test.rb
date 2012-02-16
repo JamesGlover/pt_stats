@@ -153,7 +153,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.finished='2012-02-09 [14:31:34]'
     story.save()
     assert_equal(0,Story.created(4).length)
@@ -163,7 +163,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.delivered='2012-02-09 [14:31:35]'
     story.save()
     assert_equal(0,Story.created(4).length)
@@ -173,7 +173,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(1,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.accepted='2012-02-09 [14:31:36]'
     story.save()
     assert_equal(0,Story.created(4).length)
@@ -183,7 +183,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(1,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.reject('2012-02-09 [14:31:37]')
     assert_equal(0,Story.created(4).length)
     assert_equal(1,Story.rejected(4).length)
@@ -192,7 +192,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.update_state('started','2012-02-09 [14:31:38]')
     assert_equal(0,Story.created(4).length)
     assert_equal(0,Story.rejected(4).length)
@@ -201,7 +201,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story = Story.find_last_by_ticket_id(1)
     story.reject('2012-02-09 [14:31:39]')
     assert_equal(0,Story.created(4).length)
@@ -211,7 +211,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
     story.update_state('started','2012-02-09 [14:31:40]')
     assert_equal(0,Story.created(4).length)
     assert_equal(0,Story.rejected(4).length)
@@ -220,7 +220,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length)
     assert_equal(0,Story.accepted(4).length)
     assert_equal(1,Story.total(4).length)
-
+  
   end
   
   def test_iteration_counts_are_correct_2()
@@ -579,7 +579,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(0).length,  "With: #{Story.delivered(0).inspect}")
     assert_equal(0,Story.accepted(0).length,  "With: #{Story.accepted(0).inspect}")
     assert_equal(3,Story.total(0).length,  "With: #{Story.total(0).inspect}")
-
+  
     # Iteration
     assert_equal(0,Story.created(4).length, "With: #{Story.created(4).inspect}")
     assert_equal(2,Story.rejected(4).length, "With: #{Story.rejected(4).inspect}")
@@ -588,7 +588,7 @@ class MyUnitTests < Test::Unit::TestCase
     assert_equal(0,Story.delivered(4).length,  "With: #{Story.delivered(4).inspect}")
     assert_equal(0,Story.accepted(4).length,  "With: #{Story.accepted(4).inspect}")
     assert_equal(3,Story.total(4).length,  "With: #{Story.total(4).inspect}")
-
+  
   end
   
   def test_story_totals_returns_stories_in_state()
@@ -829,6 +829,7 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal('accepted',story.state)
         assert_equal(DateTime.parse('2012/01/31 13:37:51 UTC'),story.created)
         assert_equal(DateTime.parse('2012/02/01 12:03:36 UTC'),story.accepted)
+        assert Story.find_by_ticket_id(24421623).id > Story.find_by_ticket_id(24421609).id
       end
       
       def test_uncreated_tickets_get_default_data()
@@ -1241,6 +1242,37 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(16,Story.bugs(0).length,  "With: #{Story.bugs(0).inspect}")
         # Iteration
         assert_equal(11,Story.bugs(4).length,  "With: #{Story.bugs(4).inspect}")
+      end
+      
+      def test_odd_bug_a()
+        File.open("./test/xml/odd_bug.xml") do |file|
+          post '/bucket',file.read()
+        end
+      end
+      
+      def test_odd_bug()
+        Story.create!(:id => 12, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:45", :started => nil, :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-07 16:43:45", :deleted => nil, :ticket_type => "feature")
+        Story.create!(:id => 17, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:45", :started=> "2012-02-09 10:50:16", :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-09 10:50:46", :deleted => nil, :ticket_type => "feature")
+        File.open("./test/xml/odd_bug.xml") do |file|
+          post '/bucket',file.read()
+        end
+        assert_equal(0,Story.rejected(0).length)
+        assert_equal(3,Story.count())
+        assert_equal(1,Story.started(0).length)
+      end
+      
+      def test_select_latest()
+        Story.create!(:id => 12, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:45", :started => nil, :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-07 16:43:45", :deleted => nil, :ticket_type => "feature")
+        Story.create!(:id => 17, :ticket_id => 24579125, :name => "new story", :created => "2012-02-07 16:43:46", :started=> "2012-02-09 10:50:16", :finished => nil, :delivered => nil, :accepted => nil, :rejected => "2012-02-09 10:50:46", :deleted => nil, :ticket_type => "feature")
+        File.open("./test/xml/odd_bug.xml") do |file|
+          post '/bucket',file.read()
+        end
+        n = Story.find_last_by_ticket_id(24579125)
+        assert_equal(0,Story.rejected(0).length)
+        assert_equal(3,Story.count())
+        assert_equal(1,Story.started(0).length)
+        assert_equal(DateTime.parse("2012-02-07 16:43:46"),n.created())
+        assert_equal('started',n.state())
       end
     
   def teardown
