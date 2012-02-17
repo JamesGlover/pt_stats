@@ -171,6 +171,7 @@ class Story < ActiveRecord::Base
  def update_state(new_state,date)
    date = Helpers.clean_date(date)
    states = ['rejected','accepted','delivered','finished','started','created']
+   new_state = 'created' if new_state == 'unstarted'
    return false unless states.include?(new_state)
    
      
@@ -211,7 +212,7 @@ class Story < ActiveRecord::Base
  end
  
  def created()
-  return read_attribute(:created) || Story.where('ticket_id=?',ticket_id).order('id ASC').first.id_created
+  Story.where('ticket_id=?',ticket_id).order('id ASC').first.id_created
  end
  
  def created=(date)

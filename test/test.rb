@@ -1500,6 +1500,70 @@ class MyUnitTests < Test::Unit::TestCase
         
       end
       
+      def test_unstarting_stories_works()
+        current_iteration = ['2012-02-09 [14:31:32]','2012-02-09 [14:31:33]','2012-02-09 [14:31:34]','2012-02-09 [14:31:35]','2012-02-09 [14:31:36]']
+        previous_iteration = ['2012-02-01 [14:31:32]','2012-02-01 [14:31:33]','2012-02-01 [14:31:34]','2012-02-01 [14:31:35]','2012-02-01 [14:31:36]']
+        subsequent_iteration = ['2012-02-15 [14:31:32]','2012-02-15 [14:31:33]','2012-02-15 [14:31:34]','2012-02-15 [14:31:35]','2012-02-15 [14:31:36]']
+        story = Story.create!(
+          :ticket_id => 1,
+          :created => current_iteration[0],
+          :started => current_iteration[1])
+        story.update_state('unstarted',current_iteration[2])
+        
+        assert_equal([1,0,0,0,0,0,1,2],it_array(0))
+        assert_equal([1,0,0,0,0,0,0,2],it_array(4))
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal('created',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.created)
+        assert_equal(DateTime.parse(current_iteration[2]),story.id_created)
+        
+        Story.destroy_all()
+        
+        # And things don't happen for equal or pre-dates
+        story = Story.create!(
+          :ticket_id => 1,
+          :created => current_iteration[0],
+          :started => current_iteration[1])
+        story.update_state('unstarted',current_iteration[0])
+        story = Story.create!(
+          :ticket_id => 2,
+          :created => current_iteration[1],
+          :started => current_iteration[2])
+        story.update_state('unstarted',current_iteration[0])
+        
+        assert_equal([0,2,0,0,0,0,2,2],it_array(0))
+        assert_equal([0,2,0,0,0,0,2,2],it_array(4))
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal('started',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.created)
+        assert_equal(DateTime.parse(current_iteration[0]),story.id_created)
+        story = Story.find_last_by_ticket_id(2)
+        assert_equal('started',story.state)
+        assert_equal(DateTime.parse(current_iteration[1]),story.created)
+        assert_equal(DateTime.parse(current_iteration[1]),story.id_created)
+        
+        Story.destroy_all()
+        
+        # And things work across iterations
+        
+        story = Story.create!(
+          :ticket_id => 1,
+          :created => current_iteration[0],
+          :started => current_iteration[1])
+        story.update_state('unstarted',subsequent_iteration[2])
+        
+        assert_equal([1,0,0,0,0,0,1,2],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,2],it_array(4))
+        assert_equal([1,0,0,0,0,0,0,2],it_array(5))
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal('created',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.created)
+        assert_equal(DateTime.parse(subsequent_iteration[2]),story.id_created)
+        
+        Story.destroy_all()
+        
+      end
+      
       def it_array(i)
         [ Story.created(i).length,
           Story.started(i).length,

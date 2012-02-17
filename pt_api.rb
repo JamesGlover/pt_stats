@@ -98,7 +98,6 @@ module PtApi
       end
       db_story = stories.last # Now work with just the most recent
       if ['rejected'].include?(hash[:current_state])
-        puts "rejecting"
         db_story.reject(hash[:created])
       elsif ['accepted'].include?(hash[:current_state])
          hash[:accepted]=hash[:created] if hash[:accepted] == nil
