@@ -36,7 +36,7 @@ class Story < ActiveRecord::Base
        finish = iteration_end(i)
        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.created < '#{finish}' AND x.created>= '#{start}') AND (COALESCE(started, finished, delivered, accepted, rejected) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
      else
-       self.find_by_sql("SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND created IS NOT NULL AND started IS NULL AND finished IS NULL AND delivered IS NULL AND accepted IS NULL AND rejected IS NULL ORDER BY ticket_id, id DESC")
+       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE  x.created IS NOT NULL AND x.started IS NULL AND x.finished IS NULL AND x.delivered IS NULL AND x.accepted IS NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
      end
  end
  
@@ -211,16 +211,16 @@ class Story < ActiveRecord::Base
    Story.where("ticket_id = ? AND rejected IS NOT NULL AND deleted IS NULL",self.ticket_id).length
  end
  
- def created()
-  Story.where('ticket_id=?',ticket_id).order('id ASC').first.id_created
+ def ori_created()
+  Story.where('ticket_id=?',ticket_id).order('id ASC').first.created
  end
  
- def created=(date)
+ def ori_created=(date)
    target = Story.where('ticket_id=?',ticket_id).order('id ASC').first
    if target == nil || target == self
-     self.id_created = date
+     self.created = date
    else # We only want to save if we've altered an unexpected record. Otherwise, leave it to the main function.
-     target.id_created = date
+     target.created = date
      target.save
    end
  end
@@ -234,14 +234,14 @@ class Story < ActiveRecord::Base
    puts "equal?" if comp.equal? self
  end
  
- def id_created()
-   read_attribute(:created) 
- end
- 
- def id_created=(date)
-   date = Helpers.clean_date(date)
-   self[:created]= date
- end
+ # def id_created()
+ #   read_attribute(:created) 
+ # end
+ # 
+ # def id_created=(date)
+ #   date = Helpers.clean_date(date)
+ #   self[:created]= date
+ # end
  
  def delete(date)
   date = Helpers.clean_date(date)

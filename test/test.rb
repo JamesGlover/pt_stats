@@ -965,8 +965,8 @@ class MyUnitTests < Test::Unit::TestCase
         PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
         story.reload()
         assert_equal($SETTINGS['test_ticket_name'], story.name)
-        assert story.created != nil
-        assert story.id_created == nil
+        assert story.ori_created != nil
+        assert story.created == nil
       end
       
       def test_original_is_updated()
@@ -986,8 +986,8 @@ class MyUnitTests < Test::Unit::TestCase
         PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
         story.reload()
         assert_equal($SETTINGS['test_ticket_name'], story.name)
-        assert story.created != nil
-        assert story.id_created == nil
+        assert story.ori_created != nil
+        assert story.created == nil
       end
       
       def test_stories_can_be_deleted()
@@ -1514,8 +1514,8 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal([1,0,0,0,0,0,0,2],it_array(4))
         story = Story.find_last_by_ticket_id(1)
         assert_equal('created',story.state)
-        assert_equal(DateTime.parse(current_iteration[0]),story.created)
-        assert_equal(DateTime.parse(current_iteration[2]),story.id_created)
+        assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
+        assert_equal(DateTime.parse(current_iteration[2]),story.created)
         
         Story.destroy_all()
         
@@ -1535,12 +1535,12 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal([0,2,0,0,0,0,2,2],it_array(4))
         story = Story.find_last_by_ticket_id(1)
         assert_equal('started',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
         assert_equal(DateTime.parse(current_iteration[0]),story.created)
-        assert_equal(DateTime.parse(current_iteration[0]),story.id_created)
         story = Story.find_last_by_ticket_id(2)
         assert_equal('started',story.state)
+        assert_equal(DateTime.parse(current_iteration[1]),story.ori_created)
         assert_equal(DateTime.parse(current_iteration[1]),story.created)
-        assert_equal(DateTime.parse(current_iteration[1]),story.id_created)
         
         Story.destroy_all()
         
@@ -1557,11 +1557,55 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal([1,0,0,0,0,0,0,2],it_array(5))
         story = Story.find_last_by_ticket_id(1)
         assert_equal('created',story.state)
-        assert_equal(DateTime.parse(current_iteration[0]),story.created)
-        assert_equal(DateTime.parse(subsequent_iteration[2]),story.id_created)
+        assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
+        assert_equal(DateTime.parse(subsequent_iteration[2]),story.created)
         
         Story.destroy_all()
         
+      end
+      
+      def test_unstarting_works_with_xml
+        current_iteration = ['2012-02-09 [14:31:32]','2012-02-09 [14:31:33]','2012-02-09 [14:31:34]','2012-02-09 [14:31:35]','2012-02-09 [14:31:36]']
+        story = Story.create!(
+          :ticket_id => 1,
+          :created => current_iteration[0],
+          :started => current_iteration[1])
+        assert_equal([0,1,0,0,0,0,1,1],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,1],it_array(4))
+        
+        File.open("./test/xml/unstarted.xml") do |file|
+          post '/bucket',file.read()
+        end
+        
+        assert_equal([1,0,0,0,0,0,1,2],it_array(0))
+        assert_equal([1,0,0,0,0,0,0,2],it_array(4))
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal('created',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
+        assert_equal(DateTime.parse(current_iteration[2]),story.created)
+
+      end
+      
+      def test_errors_in_counts_with_complex_data()
+          
+        b = Story.create!( :id => 18, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31", 
+          :started => "2012-02-09 10:51:31", :finished=> "2012-02-15 16:11:43", :delivered=> "2012-02-15 16:11:44", :accepted=> nil, :rejected=> "2012-02-15 16:14:55", :deleted=> nil, :ticket_type=> "feature")
+        c = Story.create!( :id => 30, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+          :started => "2012-02-16 11:19:10", :finished=> "2012-02-17 10:23:47", :delivered=> "2012-02-17 10:25:31", :accepted=> nil, :rejected=> "2012-02-17 10:26:05", :deleted=> nil, :ticket_type=> "feature")
+        d = Story.create!( :id => 25, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31",
+          :started => "2012-02-15 16:15:12", :finished=> "2012-02-16 11:18:49", :delivered=> "2012-02-16 11:18:50", :accepted=> nil, :rejected=> "2012-02-16 11:18:51", :deleted=> nil, :ticket_type=> "feature")
+        e = Story.create!( :id => 42, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+           :started => "2012-02-17 10:27:55", :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
+        f = Story.create!( :id => 48, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-17 11:16:36",
+           :started => nil, :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
+        
+        assert_equal([1,0,0,0,0,0,1,5],it_array(0), "With state: #{Story.find_last_by_ticket_id(24692539).state}, and created:#{Story.find_last_by_ticket_id(24692539).created} ori_created:#{Story.find_last_by_ticket_id(24692539).ori_created}")
+        
+        g = Story.create!( :id => 53, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+                   :started => "2012-02-17 11:38:41", :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
+                   
+        assert_equal([0,1,0,0,0,0,1,6],it_array(0))
+                
       end
       
       def it_array(i)

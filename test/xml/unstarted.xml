@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activity>
+  <id type="integer">162917085</id>
+  <version type="integer">206</version>
+  <event_type>story_update</event_type>
+  <occurred_at type="datetime">2012-02-09 [14:31:34]</occurred_at>
+  <author>James Glover</author>
+  <project_id type="integer">466613</project_id>
+  <description>James Glover edited &quot;Start, then put back on ice&quot;</description>
+  <stories type="array">
+    <story>
+      <id type="integer">1</id>
+      <url>http://www.pivotaltracker.com/services/v3/projects/455451/stories/25105815</url>
+      <current_state>unstarted</current_state>
+    </story>
+  </stories>
+</activity>

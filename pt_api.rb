@@ -91,12 +91,12 @@ module PtApi
         stories << Story.find_or_create_by_ticket_id(hash[:ticket_id])
       end
       stories.each do |db_story| # Repair name and created for all
-        db_story.created = hash[:created] if db_story.created == nil
         db_story.name = hash[:name] if db_story.name == 'Unknown story' || db_story.name == nil
         db_story.ticket_type = hash[:ticket_type] if db_story.ticket_type == 'unknown' || db_story.ticket_type == nil
         db_story.save
       end
       db_story = stories.last # Now work with just the most recent
+      db_story.ori_created = hash[:created] if db_story.ori_created == nil
       if ['rejected'].include?(hash[:current_state])
         db_story.reject(hash[:created])
       elsif ['accepted'].include?(hash[:current_state])
