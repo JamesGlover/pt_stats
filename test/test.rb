@@ -114,102 +114,43 @@ class MyUnitTests < Test::Unit::TestCase
   
   def test_method_accessors_return_stories()
     provide_stories()
-    assert_equal(1,Story.created(0).length)
-    assert_equal(2,Story.started(0).length)
-    assert_equal(2,Story.finished(0).length)
-    assert_equal(1,Story.delivered(0).length)
-    assert_equal(3,Story.accepted(0).length)
-    assert_equal(9,Story.total(0).length)
+    assert_equal([1,2,2,1,3,0,9,9],it_array(0))
   end
   
   def test_iteration_counts_are_correct()
     story=Story.create!(
     :ticket_id=>1,
     :created => '2012-02-09 [14:31:32]')
-    assert_equal(1,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(0,Story.total(4).length)
+    assert_equal([1,0,0,0,0,0,0,1],it_array(4))
     
     story.started='2012-02-09 [14:31:33]'
     story.save()
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(1,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,1,0,0,0,0,1,1],it_array(4))
   
     story.finished='2012-02-09 [14:31:34]'
     story.save()
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(1,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,0,1,0,0,0,1,1],it_array(4))
   
     story.delivered='2012-02-09 [14:31:35]'
     story.save()
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(1,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,0,0,1,0,0,1,1],it_array(4))
   
     story.accepted='2012-02-09 [14:31:36]'
     story.save()
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(1,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,0,0,0,1,0,1,1],it_array(4))
   
     story.reject('2012-02-09 [14:31:37]')
-    assert_equal(0,Story.created(4).length)
-    assert_equal(1,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,0,0,0,0,1,1,1],it_array(4))
   
     story.update_state('started','2012-02-09 [14:31:38]')
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(1,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,1,0,0,0,0,1,2],it_array(4))
   
     story = Story.find_last_by_ticket_id(1)
     story.reject('2012-02-09 [14:31:39]')
-    assert_equal(0,Story.created(4).length)
-    assert_equal(1,Story.rejected(4).length)
-    assert_equal(0,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,0,0,0,0,1,1,2],it_array(4))
   
     story.update_state('started','2012-02-09 [14:31:40]')
-    assert_equal(0,Story.created(4).length)
-    assert_equal(0,Story.rejected(4).length)
-    assert_equal(1,Story.started(4).length)
-    assert_equal(0,Story.finished(4).length)
-    assert_equal(0,Story.delivered(4).length)
-    assert_equal(0,Story.accepted(4).length)
-    assert_equal(1,Story.total(4).length)
+    assert_equal([0,1,0,0,0,0,1,3],it_array(4))
   
   end
   
@@ -317,21 +258,11 @@ class MyUnitTests < Test::Unit::TestCase
     :delivered => '2036-02-09 [14:31:35]',
     :accepted => '2036-02-09 [14:31:36]')
     # Totals
-    assert_equal(3,Story.created(0).length, "With: #{Story.created(0).inspect}")
-    assert_equal(2,Story.rejected(0).length, "With: #{Story.rejected(0).inspect}")
-    assert_equal(3,Story.started(0).length, "With: #{Story.started(0).inspect}")
-    assert_equal(1,Story.finished(0).length,  "With: #{Story.finished(0).inspect}")
-    assert_equal(1,Story.delivered(0).length,  "With: #{Story.delivered(0).inspect}")
-    assert_equal(6,Story.accepted(0).length,  "With: #{Story.accepted(0).inspect}")
-    assert_equal(16,Story.total(0).length,  "With: #{Story.total(0).inspect}")
+    assert_equal([3,3,1,1,6,2,16,18],it_array(0))
+    
     # Iteration
-    assert_equal(2,Story.created(4).length, "With: #{Story.created(4).inspect}")
-    assert_equal(2,Story.rejected(4).length, "With: #{Story.rejected(4).inspect}")
-    assert_equal(3,Story.started(4).length, "With: #{Story.started(4).inspect}")
-    assert_equal(2,Story.finished(4).length,  "With: #{Story.finished(4).inspect}")
-    assert_equal(3,Story.delivered(4).length,  "With: #{Story.delivered(4).inspect}")
-    assert_equal(1,Story.accepted(4).length,  "With: #{Story.accepted(4).inspect}")
-    assert_equal(11,Story.total(4).length,  "With: #{Story.total(4).inspect}")
+    assert_equal([2,3,2,3,1,2,11,18],it_array(4))
+    
   end
   
   def test_iteration_counts_are_correct_5()
@@ -361,21 +292,11 @@ class MyUnitTests < Test::Unit::TestCase
     :rejected => '2014-02-09 [14:31:33]'
     )
     # Totals
-    assert_equal(0,Story.created(0).length, "With: #{Story.created(0).inspect}")
-    assert_equal(5,Story.rejected(0).length, "With: #{Story.rejected(0).inspect}")
-    assert_equal(0,Story.started(0).length, "With: #{Story.started(0).inspect}")
-    assert_equal(0,Story.finished(0).length,  "With: #{Story.finished(0).inspect}")
-    assert_equal(0,Story.delivered(0).length,  "With: #{Story.delivered(0).inspect}")
-    assert_equal(0,Story.accepted(0).length,  "With: #{Story.accepted(0).inspect}")
-    assert_equal(5,Story.total(0).length,  "With: #{Story.total(0).inspect}")
+    assert_equal([0,0,0,0,0,5,5,5],it_array(0))
+
     # Iteration
-    assert_equal(1,Story.created(4).length, "With: #{Story.created(4).inspect}")
-    assert_equal(3,Story.rejected(4).length, "With: #{Story.rejected(4).inspect}")
-    assert_equal(0,Story.started(4).length, "With: #{Story.started(4).inspect}")
-    assert_equal(0,Story.finished(4).length,  "With: #{Story.finished(4).inspect}")
-    assert_equal(0,Story.delivered(4).length,  "With: #{Story.delivered(4).inspect}")
-    assert_equal(0,Story.accepted(4).length,  "With: #{Story.accepted(4).inspect}")
-    assert_equal(3,Story.total(4).length,  "With: #{Story.total(4).inspect}")
+    assert_equal([1,0,0,0,0,3,3,5],it_array(4))
+
   end
   
   def test_iteration_counts_are_correct_3()
@@ -443,21 +364,10 @@ class MyUnitTests < Test::Unit::TestCase
     :ticket_id=>7,
     :started => '2012-02-09 [14:31:33]')
     # Totals
-    assert_equal(0,Story.created(0).length, "With: #{Story.created(0).inspect}")
-    assert_equal(0,Story.rejected(0).length, "With: #{Story.rejected(0).inspect}")
-    assert_equal(2,Story.started(0).length, "With: #{Story.started(0).inspect}")
-    assert_equal(1,Story.finished(0).length,  "With: #{Story.finished(0).inspect}")
-    assert_equal(1,Story.delivered(0).length,  "With: #{Story.delivered(0).inspect}")
-    assert_equal(3,Story.accepted(0).length,  "With: #{Story.accepted(0).inspect}")
-    assert_equal(7,Story.total(0).length,  "With: #{Story.total(0).inspect}")
+    assert_equal([0,2,1,1,3,0,7,13],it_array(0))
     # Iteration
-    assert_equal(0,Story.created(4).length, "With: #{Story.created(4).inspect}")
-    assert_equal(3,Story.rejected(4).length, "With: #{Story.rejected(4).inspect}")
-    assert_equal(2,Story.started(4).length, "With: #{Story.started(4).inspect}")
-    assert_equal(0,Story.finished(4).length,  "With: #{Story.finished(4).inspect}")
-    assert_equal(0,Story.delivered(4).length,  "With: #{Story.delivered(4).inspect}")
-    assert_equal(0,Story.accepted(4).length,  "With: #{Story.accepted(4).inspect}")
-    assert_equal(5,Story.total(4).length,  "With: #{Story.total(4).inspect}")
+    assert_equal([0,2,0,0,0,3,5,13],it_array(4))
+
   end
   
   def test_iteration_counts_are_correct_4()
@@ -543,22 +453,10 @@ class MyUnitTests < Test::Unit::TestCase
     :ticket_id=>3,
     :started => '2032-02-09 [14:33:33]')
     # Totals
-    assert_equal(0,Story.created(0).length, "With: #{Story.created(0).inspect}")
-    assert_equal(1,Story.rejected(0).length, "With: #{Story.rejected(0).inspect}")
-    assert_equal(2,Story.started(0).length, "With: #{Story.started(0).inspect}")
-    assert_equal(0,Story.finished(0).length,  "With: #{Story.finished(0).inspect}")
-    assert_equal(0,Story.delivered(0).length,  "With: #{Story.delivered(0).inspect}")
-    assert_equal(0,Story.accepted(0).length,  "With: #{Story.accepted(0).inspect}")
-    assert_equal(3,Story.total(0).length,  "With: #{Story.total(0).inspect}")
+    assert_equal([0,2,0,0,0,1,3,14],it_array(0))
   
     # Iteration
-    assert_equal(0,Story.created(4).length, "With: #{Story.created(4).inspect}")
-    assert_equal(2,Story.rejected(4).length, "With: #{Story.rejected(4).inspect}")
-    assert_equal(1,Story.started(4).length, "With: #{Story.started(4).inspect}")
-    assert_equal(0,Story.finished(4).length,  "With: #{Story.finished(4).inspect}")
-    assert_equal(0,Story.delivered(4).length,  "With: #{Story.delivered(4).inspect}")
-    assert_equal(0,Story.accepted(4).length,  "With: #{Story.accepted(4).inspect}")
-    assert_equal(3,Story.total(4).length,  "With: #{Story.total(4).inspect}")
+    assert_equal([0,1,0,0,0,2,3,14],it_array(4))
   
   end
   
@@ -605,14 +503,7 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(false,Story.find_last_by_ticket_id(1).delivered?)
         assert_equal(false,Story.find_last_by_ticket_id(1).accepted?)
         assert_equal(false,Story.find_last_by_ticket_id(1).rejected?)
-        assert_equal(1,Story.total(0).length)
-        assert_equal(1,Story.count)
-        assert_equal(0,Story.created(0).length)
-        assert_equal(1,Story.started(0).length)
-        assert_equal(0,Story.finished(0).length)
-        assert_equal(0,Story.delivered(0).length)
-        assert_equal(0,Story.accepted(0).length)
-        assert_equal(0,Story.rejected(0).length)
+        assert_equal([0,1,0,0,0,0,1,1],it_array(0))
         
         # Check we can skip a stage (In case we miss an update)
         Story.find_last_by_ticket_id(1).update_state("delivered","2014/01/31 13:37:51 UTC")
@@ -623,14 +514,8 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(true,Story.find_last_by_ticket_id(1).delivered?)
         assert_equal(false,Story.find_last_by_ticket_id(1).accepted?)
         assert_equal(false,Story.find_last_by_ticket_id(1).rejected?)
+        assert_equal([0,0,0,1,0,0,1,1],it_array(0))
         assert_equal(1,Story.total(0).length)
-        assert_equal(1,Story.count)
-        assert_equal(0,Story.created(0).length)
-        assert_equal(0,Story.started(0).length)
-        assert_equal(0,Story.finished(0).length)
-        assert_equal(1,Story.delivered(0).length)
-        assert_equal(0,Story.accepted(0).length)
-        assert_equal(0,Story.rejected(0).length)
         
         # Check that we can't go back a stage on old events
         Story.find_last_by_ticket_id(1).update_state("finished","2014/01/31 13:37:50 UTC")
@@ -643,14 +528,7 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(false,story.accepted?)
         assert_equal(false,story.rejected?)
         assert_equal(DateTime.parse("2014/01/31 13:37:50 UTC"),story.finished)
-        assert_equal(1,Story.total(0).length)
-        assert_equal(1,Story.count)
-        assert_equal(0,Story.created(0).length)
-        assert_equal(0,Story.started(0).length)
-        assert_equal(0,Story.finished(0).length)
-        assert_equal(1,Story.delivered(0).length)
-        assert_equal(0,Story.accepted(0).length)
-        assert_equal(0,Story.rejected(0).length)
+        assert_equal([0,0,0,1,0,0,1,1],it_array(0))
         
         # Check that we do go back a stage on NEW events
         Story.find_last_by_ticket_id(1).update_state("finished","2014/01/31 13:37:51 UTC")
@@ -662,17 +540,8 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(false,story.delivered?)
         assert_equal(false,story.accepted?)
         assert_equal(false,story.rejected?)
-        #assert_equal(DateTime.parse("2012-01-31 [14:31:32]"),story.created)
-        #assert_equal(DateTime.parse("2013/01/31 13:37:51 UTC"),story.started)
         assert_equal(DateTime.parse("2014/01/31 13:37:51 UTC"),story.finished)
-        assert_equal(1,Story.total(0).length)
-        assert_equal(2,Story.count)
-        assert_equal(0,Story.created(0).length)
-        assert_equal(0,Story.started(0).length)
-        assert_equal(1,Story.finished(0).length)
-        assert_equal(0,Story.delivered(0).length)
-        assert_equal(0,Story.accepted(0).length)
-        assert_equal(0,Story.rejected(0).length)
+        assert_equal([0,0,1,0,0,0,1,2],it_array(0))
   
       end
       
@@ -683,18 +552,20 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal("rejected",Story.find_last_by_ticket_id(6).state)
         Story.find_last_by_ticket_id(6).update_state('started','2014/06/03')
         assert_equal(2,Story.find_all_by_ticket_id(6).length)
-        assert_equal("started",Story.find_last_by_ticket_id(6).state)
-        assert_equal(false,Story.find_last_by_ticket_id(6).created?)
-        assert_equal(true,Story.find_last_by_ticket_id(6).started?)
-        assert_equal(false,Story.find_last_by_ticket_id(6).finished?)
-        assert_equal(false,Story.find_last_by_ticket_id(6).delivered?)
-        assert_equal(false,Story.find_last_by_ticket_id(6).accepted?)
-        assert_equal(1,Story.find_last_by_ticket_id(6).rejection_count)
+        story = Story.find_last_by_ticket_id(6)
+        assert_equal("started",story.state)
+        assert_equal(false,story.created?)
+        assert_equal(true,story.started?)
+        assert_equal(false,story.finished?)
+        assert_equal(false,story.delivered?)
+        assert_equal(false,story.accepted?)
+        assert_equal(1,story.rejection_count)
         #assert Story.where("rejected IS NOT NULL").first.finished?
-        Story.find_last_by_ticket_id(6).reject("2015/01/31 13:37:51 UTC")
-        Story.find_last_by_ticket_id(6).update_state('started','2062/01/03')
+        story.reject("2015/01/31 13:37:51 UTC")
+        story.update_state('started','2062/01/03')
+        story.reload
         assert_equal(3,Story.find_all_by_ticket_id(6).length)
-        assert_equal(2,Story.find_last_by_ticket_id(6).rejection_count)
+        assert_equal(2,story.rejection_count)
       end
       
       def test_delayed_tickets_on_rejected_stories()
@@ -1618,20 +1489,20 @@ class MyUnitTests < Test::Unit::TestCase
       
       def test_errors_in_counts_with_complex_data()
           
-        b = Story.create!( :id => 18, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31", 
+        Story.create!( :id => 18, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31", 
           :started => "2012-02-09 10:51:31", :finished=> "2012-02-15 16:11:43", :delivered=> "2012-02-15 16:11:44", :accepted=> nil, :rejected=> "2012-02-15 16:14:55", :deleted=> nil, :ticket_type=> "feature")
-        c = Story.create!( :id => 30, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+        Story.create!( :id => 30, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
           :started => "2012-02-16 11:19:10", :finished=> "2012-02-17 10:23:47", :delivered=> "2012-02-17 10:25:31", :accepted=> nil, :rejected=> "2012-02-17 10:26:05", :deleted=> nil, :ticket_type=> "feature")
-        d = Story.create!( :id => 25, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31",
+        Story.create!( :id => 25, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-09 10:51:31",
           :started => "2012-02-15 16:15:12", :finished=> "2012-02-16 11:18:49", :delivered=> "2012-02-16 11:18:50", :accepted=> nil, :rejected=> "2012-02-16 11:18:51", :deleted=> nil, :ticket_type=> "feature")
-        e = Story.create!( :id => 42, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+        Story.create!( :id => 42, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
            :started => "2012-02-17 10:27:55", :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
-        f = Story.create!( :id => 48, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-17 11:16:36",
+        Story.create!( :id => 48, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => "2012-02-17 11:16:36",
            :started => nil, :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
         
         assert_equal([1,0,0,0,0,0,1,5],it_array(0), "With state: #{Story.find_last_by_ticket_id(24692539).state}, and created:#{Story.find_last_by_ticket_id(24692539).created} ori_created:#{Story.find_last_by_ticket_id(24692539).ori_created}")
         
-        g = Story.create!( :id => 53, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
+        Story.create!( :id => 53, :ticket_id => 24692539, :name => "Testing Created Count Without Rejection", :created => nil,
                    :started => "2012-02-17 11:38:41", :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
                    
         assert_equal([0,1,0,0,0,0,1,6],it_array(0))
@@ -1671,12 +1542,7 @@ class MyUnitTests < Test::Unit::TestCase
           :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
         Story.create!( :id => 3, :ticket_id => 3, :name => "C", :created => "2012-02-17 10:32:07", :started=> "2012-02-17 10:32:37",
           :finished=> "2012-02-17 10:40:37", :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
-        
-        # def PtApi.fetch_xml(uri,api_key)
-        #   file = File.open("./test/xml/popbig.xml")
-        #   return data = REXML::Document.new(file.read)
-        # end
-        
+
         PtApi.populate_database([],'file',"./test/xml/popbig.xml",'all')
         
         assert_equal('started',Story.find_last_by_ticket_id(1).state)
@@ -1691,7 +1557,65 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(DateTime.parse("2012-02-17 10:40:37"),Story.find_last_by_ticket_id(3).started)
         
       end
-        
+      
+      def test_rejection_counts()
+        Story.create!(
+        :ticket_id=>1, :ticket_type=> 'feature',
+        :created => '2012-02-09 [14:31:32]',
+        :started => '2012-02-09 [14:31:33]',
+        :rejected => '2012-02-09 [14:31:34]'
+        )
+        Story.create!(
+        :ticket_id=>2, :ticket_type=> 'feature',
+        :created => '2012-02-09 [14:31:32]',
+        :started => '2012-02-09 [14:31:33]',
+        :rejected => '2012-02-09 [14:31:34]'
+        )
+        Story.create!(
+        :ticket_id=>2, :ticket_type=> 'feature',
+        :started => '2012-02-09 [14:32:33]',
+        :rejected => '2012-02-09 [14:32:34]'
+        )
+        Story.create!(
+        :ticket_id=>2, :ticket_type=> 'feature',
+        :started => '2012-02-09 [14:33:33]',
+        )
+        Story.create!(
+        :ticket_id=>3, :ticket_type=> 'feature',
+        :created => '2012-02-09 [14:31:32]',
+        :started => '2012-02-09 [14:31:33]'
+        )
+        Story.create!(
+        :ticket_id=>4, :ticket_type=> 'feature',
+        :created => '2012-02-09 [14:31:32]',
+        :started => '2012-02-09 [14:31:33]',
+        :finished => '2012-02-09 [14:31:34]'
+        )
+        Story.create!(
+        :ticket_id=>4, :ticket_type=> 'feature',
+        :started => '2012-02-09 [14:31:35]',
+        )
+        Story.create!(
+        :ticket_id=>5, :ticket_type=> 'feature',
+        :created => '2012-02-09 [14:31:32]',
+        :started => '2012-02-09 [14:31:33]',
+        :rejected => '2012-02-09 [14:31:34]'
+        )
+        Story.create!(
+        :ticket_id=>5, :ticket_type=> 'feature',
+        :started => '2012-02-09 [14:32:33]',
+        :finished => '2012-02-09 [14:32:34]'
+        )
+        Story.create!(
+        :ticket_id=>5, :ticket_type=> 'feature',
+        :started => '2012-02-09 [14:33:33]',
+        )
+        assert_equal(1,Story.find_last_by_ticket_id(1).rejection_count)
+        assert_equal(2,Story.find_last_by_ticket_id(2).rejection_count)
+        assert_equal(0,Story.find_last_by_ticket_id(3).rejection_count)
+        assert_equal(0,Story.find_last_by_ticket_id(4).rejection_count)
+        assert_equal(1,Story.find_last_by_ticket_id(5).rejection_count)
+      end
       
       def it_array(i)
         [ Story.created(i).length,

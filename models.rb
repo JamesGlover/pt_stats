@@ -29,63 +29,39 @@ class Story < ActiveRecord::Base
  @environment = ENV['RACK_ENV'] || 'development'
  @environment = 'production' if ENV['DATABASE_URL']
 
-#(8 < 5) IS NOT FALSE;
+
+ def self.select_state(state,i)
+  states = ['created', 'started', 'finished', 'delivered', 'accepted', 'rejected']
+  return [] unless states.include? state
+  states.slice!(0..states.index(state))
+  if i!=0
+    start = iteration_start(i)
+    finish = iteration_end(i)
+    bound = ['created','accepted'].include?(state) ? ">= '#{start}'" : "IS NOT NULL"
+    self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.#{state} < '#{finish}' AND x.#{state} #{bound}) AND (COALESCE(#{states.join(', ')}) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
+   else
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.#{state} IS NOT NULL AND (COALESCE(#{states.join(', ')}) IS NULL) ORDER BY ticket_id, id DESC")
+   end
+ end
+ 
  def self.created(i)
-     if i !=0
-       start = iteration_start(i)
-       finish = iteration_end(i)
-       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.created < '#{finish}' AND x.created>= '#{start}') AND (COALESCE(started, finished, delivered, accepted, rejected) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
-     else
-       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE  x.created IS NOT NULL AND x.started IS NULL AND x.finished IS NULL AND x.delivered IS NULL AND x.accepted IS NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
-     end
+   select_state('created',i)
  end
  
  def self.started(i)
-
-     if i !=0
-        start = iteration_start(i)
-        finish = iteration_end(i)
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.started IS NOT NULL AND x.started < '#{finish}') AND (COALESCE(finished, delivered, accepted, rejected) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
-      else
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE  x.started IS NOT NULL AND x.finished IS NULL AND x.delivered IS NULL AND x.accepted IS NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
-      end
-
+   select_state('started',i)
  end
  
  def self.finished(i)
-
-     if i !=0
-        start = iteration_start(i)
-        finish = iteration_end(i)
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.finished IS NOT NULL AND x.finished < '#{finish}') AND (COALESCE(delivered, accepted, rejected) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
-      else
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.deleted IS NULL AND x.finished IS NOT NULL AND x.delivered IS NULL AND x.accepted IS NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
-      end
-  
+   select_state('finished',i)
  end
  
  def self.delivered(i)
-
-     if i !=0
-        start = iteration_start(i)
-        finish = iteration_end(i)
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.delivered IS NOT NULL AND x.delivered < '#{finish}') AND (COALESCE(accepted, rejected) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
-      else
-        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.deleted IS NULL AND x.delivered IS NOT NULL AND x.accepted IS NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
-      end
-
+   select_state('delivered',i)
  end
   
  def self.accepted(i)
-
-     if i !=0
-         start = iteration_start(i)
-         finish = iteration_end(i)
-         self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE(x.accepted >= '#{start}' AND x.accepted < '#{finish}') AND (x.rejected IS NULL OR x.rejected>= '#{finish}') ORDER BY ticket_id, id DESC")
-       else
-         self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.deleted IS NULL AND x.accepted IS NOT NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
-       end
-
+   select_state('accepted',i)
  end
  
  def self.rejected(i)
@@ -93,7 +69,7 @@ class Story < ActiveRecord::Base
      if i !=0
        start = iteration_start(i)
        finish = iteration_end(i)
-       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (started < '#{finish}' OR started IS NULL) ORDER BY ticket_id ASC, id DESC ) AS x WHERE x.rejected <'#{finish}'")
+       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id ASC, id DESC ) AS x WHERE x.rejected <'#{finish}'")
      else
        self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.rejected IS NOT NULL")
      end
@@ -235,15 +211,6 @@ class Story < ActiveRecord::Base
    puts "eql?" if comp.eql? self
    puts "equal?" if comp.equal? self
  end
- 
- # def id_created()
- #   read_attribute(:created) 
- # end
- # 
- # def id_created=(date)
- #   date = Helpers.clean_date(date)
- #   self[:created]= date
- # end
  
  def delete(date)
   date = Helpers.clean_date(date)
