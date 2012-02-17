@@ -920,6 +920,16 @@ class MyUnitTests < Test::Unit::TestCase
         assert !incomplete.include?(8)
       end
       
+      def test_no_created_nolonger_incomplete()
+        Story.create!( # Create story with placeholders
+          :ticket_id => 1,
+          :name => "Known story",
+          :created => nil,
+          :ticket_type => 'bug'
+          )
+          assert_equal(0,Story.incomplete().length)
+      end
+      
       def test_update_stories_updates()
         File.open("./test/xml/start2.xml") do |file|
           post '/bucket',file.read()
@@ -935,6 +945,49 @@ class MyUnitTests < Test::Unit::TestCase
         PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],incomplete)
         story.reload()
         assert_equal($SETTINGS['test_ticket_name'], story.name)
+      end
+      
+      def test_clones_date_not_updated()
+        Story.create!(
+          :ticket_id => $SETTINGS["test_ticket_id"],
+          :name => 'Unknown story',
+          :created => DateTime.parse('01-01-2000'),
+          :started => DateTime.parse('01-02-2000'),
+          :finished => DateTime.parse('01-03-2000')
+        )
+        story = Story.create!(
+          :ticket_id => $SETTINGS["test_ticket_id"],
+          :name => 'Unknown story',
+          :started => DateTime.parse('01-04-2000')
+        )
+        assert Story.incomplete.length == 0;
+        return nil if $NO_API
+        PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
+        story.reload()
+        assert_equal($SETTINGS['test_ticket_name'], story.name)
+        assert story.created != nil
+        assert story.id_created == nil
+      end
+      
+      def test_original_is_updated()
+        Story.create!(
+          :ticket_id => $SETTINGS["test_ticket_id"],
+          :name => $SETTINGS['test_ticket_name'],
+          :started => DateTime.parse('01-02-2000'),
+          :finished => DateTime.parse('01-03-2000')
+        )
+        story = Story.create!(
+          :ticket_id => $SETTINGS["test_ticket_id"],
+          :name => $SETTINGS['test_ticket_name'],
+          :started => DateTime.parse('01-04-2000')
+        )
+        assert Story.incomplete.length == 0;
+        return nil if $NO_API
+        PtApi.populate_database([],$SETTINGS['project_id'],$SETTINGS['api_token'],'all')
+        story.reload()
+        assert_equal($SETTINGS['test_ticket_name'], story.name)
+        assert story.created != nil
+        assert story.id_created == nil
       end
       
       def test_stories_can_be_deleted()

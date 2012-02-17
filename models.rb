@@ -122,7 +122,7 @@ class Story < ActiveRecord::Base
  end
  
  def self.incomplete()
-   incomplete = self.where("name = :name OR ticket_type = :type OR created IS NULL AND deleted IS NULL",
+   incomplete = self.where("name = :name OR ticket_type = :type AND deleted IS NULL",
    {:name => 'Unknown Story', :type => 'unknown'})
    incomplete.map do |story|
      story.ticket_id
@@ -208,6 +208,38 @@ class Story < ActiveRecord::Base
  
  def rejection_count()
    Story.where("ticket_id = ? AND rejected IS NOT NULL AND deleted IS NULL",self.ticket_id).length
+ end
+ 
+ def created()
+  return read_attribute(:created) || Story.where('ticket_id=?',ticket_id).order('id ASC').first.id_created
+ end
+ 
+ def created=(date)
+   target = Story.where('ticket_id=?',ticket_id).order('id ASC').first
+   if target == nil || target == self
+     self.id_created = date
+   else # We only want to save if we've altered an unexpected record. Otherwise, leave it to the main function.
+     target.id_created = date
+     target.save
+   end
+ end
+ 
+ def test_checks(id)
+   comp = Story.where('id=?',id).first
+   p comp
+   p self
+   puts "==" if comp == self
+   puts "eql?" if comp.eql? self
+   puts "equal?" if comp.equal? self
+ end
+ 
+ def id_created()
+   read_attribute(:created) 
+ end
+ 
+ def id_created=(date)
+   date = Helpers.clean_date(date)
+   self[:created]= date
  end
  
  def delete(date)
