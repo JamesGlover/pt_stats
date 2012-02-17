@@ -337,7 +337,7 @@ module PtApi
         ticket_id = rec_story.elements["id"].text
         
         # =>       # The earliest rejected ticket that postdates the event, or the active ticket                          OR  the most recent reject
-        db_story = Story.where('ticket_id=? AND (rejected > ? OR rejected IS NULL)',ticket_id, date).order('id ASC').first || Story.find_last_by_ticket_id(ticket_id)
+        db_story = Story.where('ticket_id=? AND (rejected > ?)',ticket_id, date).order('id ASC').first || Story.find_last_by_ticket_id(ticket_id)
         db_story = Story.create!(:ticket_id => ticket_id) if db_story == nil
         
         if event_type =='story_create'

@@ -673,7 +673,7 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal(0,Story.delivered(0).length)
         assert_equal(0,Story.accepted(0).length)
         assert_equal(0,Story.rejected(0).length)
-
+  
       end
       
       def test_starting_rejected_stories_provides_new_story()
@@ -1372,9 +1372,9 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', current_iteration[1] )
-
+  
         b.reload()
         assert_equal('started',b.state())
         assert_equal([0,1,0,0,0,0,1,1],it_array(0))
@@ -1386,10 +1386,10 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', current_iteration[1] )
         b.update_state('started', current_iteration[1] )
-
+  
         b.reload()
         assert_equal('started',b.state())
         assert_equal([0,1,0,0,0,0,1,1],it_array(0))
@@ -1401,11 +1401,11 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', previous_iteration[1] )
         b.update_state('finished', previous_iteration[2] )
         b.update_state('started', current_iteration[1] )
-
+  
         b.reload()
         assert_equal('finished',b.state())
         assert_equal([0,1,0,0,0,0,1,2],it_array(0))
@@ -1417,11 +1417,11 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', previous_iteration[1] )
         b.update_state('finished', previous_iteration[2] )
         b.update_state('started', subsequent_iteration[1] )
-
+  
         b.reload()
         assert_equal('finished',b.state())
         assert_equal([0,1,0,0,0,0,1,2],it_array(0))
@@ -1433,12 +1433,12 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', previous_iteration[1] )
         b.update_state('finished', previous_iteration[2] )
         b.update_state('delivered', previous_iteration[2] )
         b.update_state('finished', subsequent_iteration[1] )
-
+  
         b.reload()
         assert_equal('delivered',b.state())
         assert_equal([0,0,1,0,0,0,1,2],it_array(0))
@@ -1450,13 +1450,13 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('started', previous_iteration[1] )
         b.update_state('finished', previous_iteration[2] )
         b.update_state('delivered', previous_iteration[3] )
         b.update_state('accepted', previous_iteration[4] )
         b.update_state('delivered', current_iteration[1] )
-
+  
         b.reload()
         assert_equal('accepted',b.state())
         assert_equal([0,0,0,1,0,0,1,2],it_array(0))
@@ -1468,28 +1468,43 @@ class MyUnitTests < Test::Unit::TestCase
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
         b.update_state('accepted', previous_iteration[1] )
         b.update_state('started', previous_iteration[2] )
-
+  
         b.reload()
         assert_equal('accepted',b.state())
         assert_equal([0,1,0,0,0,0,1,2],it_array(0))
         assert_equal([0,1,0,0,0,0,1,2],it_array(4))
-        assert_equal([0,1,0,0,1,0,1,2],it_array(3))
+        assert_equal([0,1,0,0,0,0,1,2],it_array(3))
         
         Story.destroy_all()
         
         b = Story.create!(
          :ticket_id=>2,
          :created => previous_iteration[0])
-
+  
+        b.update_state('accepted', previous_iteration[1] )
+        b.update_state('started', current_iteration[2] )
+  
+        b.reload()
+        assert_equal('accepted',b.state())
+        assert_equal([0,1,0,0,0,0,1,2],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,2],it_array(4))
+        assert_equal([0,0,0,0,1,0,1,2],it_array(3))
+        
+        Story.destroy_all()
+        
+        b = Story.create!(
+         :ticket_id=>2,
+         :created => previous_iteration[0])
+  
         b.update_state('started', previous_iteration[1] )
         b.update_state('finished', previous_iteration[2] )
         b.update_state('delivered', previous_iteration[3] )
         b.update_state('accepted', previous_iteration[4] )
         b.update_state('finished', current_iteration[1] )
-
+  
         b.reload()
         assert_equal('accepted',b.state())
         assert_equal([0,0,1,0,0,0,1,2],it_array(0))
@@ -1583,7 +1598,7 @@ class MyUnitTests < Test::Unit::TestCase
         assert_equal('created',story.state)
         assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
         assert_equal(DateTime.parse(current_iteration[2]),story.created)
-
+  
       end
       
       def test_errors_in_counts_with_complex_data()
@@ -1605,8 +1620,35 @@ class MyUnitTests < Test::Unit::TestCase
                    :started => "2012-02-17 11:38:41", :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "feature")
                    
         assert_equal([0,1,0,0,0,0,1,6],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,6],it_array(5))
                 
       end
+      
+      def test_specific_failure_with_xml()
+        Story.create!( :id => 45, :ticket_id => 25105815, :name => "Start, then put back on ice", :created => "2012-02-17 10:32:07", :started=> "2012-02-17 10:32:37",
+          :finished=> nil, :delivered=> nil, :accepted=> "2012-02-17 11:39:00", :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        Story.create!( :id => 46, :ticket_id => 25105815, :name => "Start, then put back on ice", :created => nil, :started=> "2012-02-17 10:50:32",
+          :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        story = Story.create!( :id => 50, :ticket_id => 25105815, :name => "Start, then put back on ice", :created => nil, :started=> "2012-02-17 11:37:49",
+          :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        
+        assert iteration_start(5) < DateTime.parse("2012-02-17 11:37:49")
+        assert iteration_end(5) > DateTime.parse("2012-02-17 11:37:49")
+        assert_equal([0,1,0,0,0,0,1,3],it_array(0))
+        assert_equal([0,1,0,0,0,0,1,3],it_array(5))
+        
+        File.open("./test/xml/specifictest.xml") do |file|
+          post '/bucket',file.read()
+        end
+        
+        assert_equal([0,0,0,0,1,0,1,3],it_array(0))
+        assert_equal([0,0,0,0,1,0,1,3],it_array(5))
+
+        story.update_state('accepted','2012/02/17 11:39:00 UTC')
+        assert_equal([0,0,0,0,1,0,1,3],it_array(0))
+        assert_equal([0,0,0,0,1,0,1,3],it_array(5))
+      end
+        
       
       def it_array(i)
         [ Story.created(i).length,

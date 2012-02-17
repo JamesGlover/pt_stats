@@ -81,7 +81,7 @@ class Story < ActiveRecord::Base
      if i !=0
          start = iteration_start(i)
          finish = iteration_end(i)
-         self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND accepted < '#{finish}' ORDER BY ticket_id, id DESC ) AS x WHERE (x.deleted IS NULL) AND (x.accepted >= '#{start}' AND x.accepted < '#{finish}') AND (x.rejected IS NULL OR x.rejected>= '#{finish}') ORDER BY ticket_id, id DESC")
+         self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE(x.accepted >= '#{start}' AND x.accepted < '#{finish}') AND (x.rejected IS NULL OR x.rejected>= '#{finish}') ORDER BY ticket_id, id DESC")
        else
          self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.deleted IS NULL AND x.accepted IS NOT NULL AND x.rejected IS NULL ORDER BY ticket_id, id DESC")
        end
