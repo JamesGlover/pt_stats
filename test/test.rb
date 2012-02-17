@@ -1534,6 +1534,21 @@ class MyUnitTests < Test::Unit::TestCase
         
         Story.destroy_all()
         
+        story = Story.create!(
+          :ticket_id => 1,
+          :created => current_iteration[0],
+          :started => current_iteration[1])
+        story.update_state('unscheduled',current_iteration[2])
+        
+        assert_equal([1,0,0,0,0,0,1,2],it_array(0))
+        assert_equal([1,0,0,0,0,0,0,2],it_array(4))
+        story = Story.find_last_by_ticket_id(1)
+        assert_equal('created',story.state)
+        assert_equal(DateTime.parse(current_iteration[0]),story.ori_created)
+        assert_equal(DateTime.parse(current_iteration[2]),story.created)
+        
+        Story.destroy_all()
+        
         # And things don't happen for equal or pre-dates
         story = Story.create!(
           :ticket_id => 1,
@@ -1643,10 +1658,38 @@ class MyUnitTests < Test::Unit::TestCase
         
         assert_equal([0,0,0,0,1,0,1,3],it_array(0))
         assert_equal([0,0,0,0,1,0,1,3],it_array(5))
-
+  
         story.update_state('accepted','2012/02/17 11:39:00 UTC')
         assert_equal([0,0,0,0,1,0,1,3],it_array(0))
         assert_equal([0,0,0,0,1,0,1,3],it_array(5))
+      end
+      
+      def test_poprepair_updates_states()
+        Story.create!( :id => 1, :ticket_id => 1, :name => "A", :created => "2012-02-17 10:32:07", :started=> nil,
+          :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        Story.create!( :id => 2, :ticket_id => 2, :name => "B", :created => "2012-02-17 10:32:07", :started=> "2012-02-17 10:32:37",
+          :finished=> nil, :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        Story.create!( :id => 3, :ticket_id => 3, :name => "C", :created => "2012-02-17 10:32:07", :started=> "2012-02-17 10:32:37",
+          :finished=> "2012-02-17 10:40:37", :delivered=> nil, :accepted=> nil, :rejected=> nil, :deleted=> nil, :ticket_type=> "chore")
+        
+        # def PtApi.fetch_xml(uri,api_key)
+        #   file = File.open("./test/xml/popbig.xml")
+        #   return data = REXML::Document.new(file.read)
+        # end
+        
+        PtApi.populate_database([],'file',"./test/xml/popbig.xml",'all')
+        
+        assert_equal('started',Story.find_last_by_ticket_id(1).state)
+        assert_equal('started',Story.find_last_by_ticket_id(2).state)
+        assert_equal('started',Story.find_last_by_ticket_id(3).state)
+        
+        assert_equal([0,3,0,0,0,0,3,4],it_array(0))
+        assert_equal([0,3,0,0,0,0,3,4],it_array(5))
+        
+        assert_equal(DateTime.parse('2012/02/17 10:32:07 UTC'),Story.find_last_by_ticket_id(1).started)
+        assert_equal(DateTime.parse("2012-02-17 10:32:37"),Story.find_last_by_ticket_id(2).started)
+        assert_equal(DateTime.parse("2012-02-17 10:40:37"),Story.find_last_by_ticket_id(3).started)
+        
       end
         
       

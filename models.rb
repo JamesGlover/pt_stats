@@ -171,21 +171,23 @@ class Story < ActiveRecord::Base
  def update_state(new_state,date)
    date = Helpers.clean_date(date)
    states = ['rejected','accepted','delivered','finished','started','created']
-   new_state = 'created' if new_state == 'unstarted'
+   new_state = 'created' if new_state == 'unstarted' || new_state == 'unscheduled'
    return false unless states.include?(new_state)
-   
-     
+   return false if self.state == new_state # Don't bother updating state if it hasn't changed.
    if (self[new_state.to_sym] != nil)&&(self[new_state.to_sym] < date)
      # create a new one
+
      story = Story.create!( :ticket_id=>self.ticket_id, :name=>self.name,:ticket_type=>self.ticket_type )
      return story.update_state(new_state,date)
    elsif (self[new_state.to_sym] != nil)
      # We're equal or older. Little to be gained by iterating back for older tickets nothing to do here (Duplicate event?)
+
      return false
    else
      # Good to go    
+
    end
-   
+
    states.each do |state| # Check we don't have more recent states
      if ( state == new_state )
        # We've got to the state, we're good to go.

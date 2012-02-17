@@ -95,7 +95,7 @@ module Helpers
   def clean_date(date)
     if date.class == String
       return DateTime.parse(date)
-    elsif date.class == DateTime
+    elsif date.class == DateTime || date.class == Time
       return date
     else
       return nil

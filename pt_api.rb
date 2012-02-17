@@ -35,6 +35,13 @@ module PtApi
     
   end
   
+  def self.read_file(file)
+    @retried = false
+    File.open(file) do |f|
+      REXML::Document.new(f.read)
+    end
+  end
+  
   def self.check_xml(data,id)
     if data.root == nil
       return {
@@ -85,7 +92,6 @@ module PtApi
   end
   
   def PtApi.create_story(hash)
-
       stories = Story.find_all_by_ticket_id(hash[:ticket_id], :order=>'id')
       if stories.length == 0
         stories << Story.find_or_create_by_ticket_id(hash[:ticket_id])
@@ -97,14 +103,22 @@ module PtApi
       end
       db_story = stories.last # Now work with just the most recent
       db_story.ori_created = hash[:created] if db_story.ori_created == nil
-      if ['rejected'].include?(hash[:current_state])
-        db_story.reject(hash[:created])
-      elsif ['accepted'].include?(hash[:current_state])
-         hash[:accepted]=hash[:created] if hash[:accepted] == nil
-         db_story.update_state(hash[:current_state],hash[:accepted])
-      elsif ['started','finished','delivered'].include?(hash[:current_state])
-        db_story.update_state(hash[:current_state],hash[:created])
+      hash[:current_state] = 'created' if hash[:current_state] == 'unstarted' || hash[:current_state] == 'unscheduled'
+      if db_story.state != hash[:current_state]
+        latest_date = db_story.rejected || db_story.accepted || db_story.delivered || db_story.finished || db_story.started || db_story.created
+        latest_date = hash[:created] if latest_date < hash[:created]
+        
+        if ['rejected'].include?(hash[:current_state])
+          db_story.reject(latest_date)
+        elsif ['accepted'].include?(hash[:current_state])
+           hash[:accepted]=latest_date if hash[:accepted] == nil
+           db_story.update_state(hash[:current_state],hash[:accepted])
+        elsif ['started','finished','delivered'].include?(hash[:current_state])
+          db_story.update_state(hash[:current_state],latest_date)
+        end
+        
       end
+      db_story.save()
       db_story
 
   end
@@ -167,10 +181,15 @@ module PtApi
       task = 1
     end
     
-    data = paginate(messages,id,api,con_list,0,task)
+    if id != 'file'
+      data = paginate(messages,id,api,con_list,0,task)
+    else
+      data = read_file(api)
+    end
     
     # Parsing XML
       begin
+
         total = data.root.attributes['total']
         success = 0
         parse_error = 0

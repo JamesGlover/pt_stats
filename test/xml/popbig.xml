@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stories type="array" count="3" total="3">
+  <story>
+    <id type="integer">1</id>
+    <project_id type="integer">466613</project_id>
+    <story_type>chore</story_type>
+    <url>http://www.pivotaltracker.com/story/show/24235441</url>
+    <estimate type="integer">2</estimate>
+    <current_state>started</current_state>
+    <description></description>
+    <name>A</name>
+    <requested_by>James Glover</requested_by>
+    <created_at type="datetime">2012/02/17 10:32:07 UTC</created_at>
+    <updated_at type="datetime">2012/02/17 14:56:37 UTC</updated_at>
+  </story>
+  <story>
+    <id type="integer">2</id>
+    <project_id type="integer">466613</project_id>
+    <story_type>chore</story_type>
+    <url>http://www.pivotaltracker.com/story/show/24235441</url>
+    <estimate type="integer">2</estimate>
+    <current_state>started</current_state>
+    <description></description>
+    <name>B</name>
+    <requested_by>James Glover</requested_by>
+    <created_at type="datetime">2012/02/17 10:32:07 UTC</created_at>
+    <updated_at type="datetime">2012/02/17 10:32:40 UTC</updated_at>
+  </story>
+  <story>
+    <id type="integer">3</id>
+    <project_id type="integer">466613</project_id>
+    <story_type>chore</story_type>
+    <url>http://www.pivotaltracker.com/story/show/24235441</url>
+    <estimate type="integer">2</estimate>
+    <current_state>started</current_state>
+    <description></description>
+    <name>C</name>
+    <requested_by>James Glover</requested_by>
+    <created_at type="datetime">2012/02/17 10:32:07 UTC</created_at>
+    <updated_at type="datetime">2012/02/17 11:56:37 UTC</updated_at>
+  </story>
+</stories>
