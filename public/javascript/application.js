@@ -19,7 +19,7 @@
         'pie': {
           renderer: jQuery.jqplot.PieRenderer,
           rendererOptions: {
-            showDataLabels: true,
+            showDataLabels: false,
             dataLabels: 'label'
           }
         },
