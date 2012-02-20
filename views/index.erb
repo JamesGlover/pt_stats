@@ -9,13 +9,16 @@
   </head>
   <body id="radiator" class="<%= ENV['RACK_ENV'] || 'development' %>">
     <h1><%= $SETTINGS["project_name"] %></h1>
-    <%= if ENV['RACK_ENV'] != 'production'
+    <!--<%= if ENV['RACK_ENV'] != 'production'
       "<h2> #{ENV['RACK_ENV'] || 'development'} environment</h2>"
-      end %>
+      end %>-->
       <div id='iteration_navigation'><div id="iteration"><h2>Iteration</h2><span id='itno'><%= iteration %></span><span id='itdate'><br/><%= iteration_end.strftime("%-d %b") %></span></div>
       <ul id='navigation'><li><a href='populate'>Manage database</a></li>
         <!--<li>Detailed stats</li>--></div>
-    <div id="tandc_container"><%= chart_render(charts,'a') %>
+    <div id="iteration_charts">
+      <%= chart_render(charts,'a') %>
+    </div>
+    <!--<div id="tandc_container">-->
     <table id="ticket_table">
       <tr>
         <th></th>
@@ -51,7 +54,7 @@
         <td id="iteration_rejected" class="iteration rejected half"><%= iteration_rejected %></td>
       </tr>
     </table>
-    <%= chart_render(charts,'b') %></div>
+    <!--</div>--><%= chart_render(charts,'b') %>
     <div id="chart_container_c" class="chart_container"><%= chart_render(charts,'c') %></div>
     
     <div id="message_centre">
