@@ -43,8 +43,8 @@ get '/' do
   i=current_iteration()
   charts = []
   charts << Charts.chart_states('pie','chart_iterations','Iteration Ticket States',[i],'c')
-  charts << Charts.chart_states('pie','chart_iterations2','Project Ticket States',[0],'a')
-  charts << Charts.chart_types('pie','chart_ticket_types','Ticket Types',[0],'c')
+  charts << Charts.chart_states('pie','chart_iterations2','Project Ticket States',[0],'c')
+  #charts << Charts.chart_types('pie','chart_ticket_types','Ticket Types',[0],'c')
   messages = []
   if Story.count() == 0
     messages << {

@@ -26,7 +26,7 @@
         'default': { // If the type is invalid, we render a pie.
           renderer: jQuery.jqplot.PieRenderer,
           rendererOptions: {
-            showDataLabels: true,
+            showDataLabels: false,
             dataLabels: 'label'
           }
         }
