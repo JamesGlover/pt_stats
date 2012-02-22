@@ -26,7 +26,7 @@ module Charts
         if i_start+i < DateTime.now
           series_data << Story.created([i_start,i_start+i+1]).length << Story.started([i_start,i_start+i+1]).length << Story.finished([i_start,i_start+i+1]).length << Story.delivered([i_start,i_start+i+1]).length << Story.accepted([i_start,i_start+i+1]).length << Story.rejected([i_start,i_start+i+1]).length
         else
-          #series_data << 0 << 0 << 0 << 0 << 0 << 0
+          # Do nothing: We don't want to break out, as we still want to build the series.
         end
         [series_title,series_data]
       end
