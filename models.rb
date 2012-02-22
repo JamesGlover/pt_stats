@@ -34,13 +34,20 @@ class Story < ActiveRecord::Base
   states = ['created', 'started', 'finished', 'delivered', 'accepted', 'rejected']
   return [] unless states.include? state
   states.slice!(0..states.index(state))
-  if i!=0
-    start = iteration_start(i)
-    finish = iteration_end(i)
-    bound = ['created','accepted'].include?(state) ? ">= '#{start}'" : "IS NOT NULL"
-    self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.#{state} < '#{finish}' AND x.#{state} #{bound}) AND (COALESCE(#{states.join(', ')}) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
+  if i==0
+    self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.#{state} IS NOT NULL AND (COALESCE(#{states.join(', ')}) IS NULL) ORDER BY ticket_id, id DESC")
    else
-     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.#{state} IS NOT NULL AND (COALESCE(#{states.join(', ')}) IS NULL) ORDER BY ticket_id, id DESC")
+     if i.is_a? Integer
+       start = iteration_start(i)
+       finish = iteration_end(i)
+     elsif i.is_a? Array
+       start = Helpers.clean_date(i[0])
+       finish = Helpers.clean_date(i[1])
+     else
+       raise ArgumentError
+     end
+     bound = ['created','accepted'].include?(state) ? ">= '#{start}'" : "IS NOT NULL"
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.#{state} < '#{finish}' AND x.#{state} #{bound}) AND (COALESCE(#{states.join(', ')}) >= '#{finish}') IS NOT FALSE ORDER BY ticket_id, id DESC")
    end
  end
  
@@ -65,35 +72,55 @@ class Story < ActiveRecord::Base
  end
  
  def self.rejected(i)
-
-     if i !=0
+   if i==0
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.rejected IS NOT NULL")
+   else
+     if i.is_a? Integer
        start = iteration_start(i)
        finish = iteration_end(i)
-       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id ASC, id DESC ) AS x WHERE x.rejected <'#{finish}'")
+     elsif i.is_a? Array
+       start = Helpers.clean_date(i[0])
+       finish = Helpers.clean_date(i[1])
      else
-       self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC ) AS x WHERE x.rejected IS NOT NULL")
+       raise ArgumentError
+     end
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id ASC, id DESC ) AS x WHERE x.rejected <'#{finish}'")
      end
      
  end
 
  def self.total(i)
-   if i !=0
-     start = iteration_start(i)
-     finish = iteration_end(i)
-     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.accepted >= '#{start}' OR x.accepted IS NULL) AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{finish}' ORDER BY ticket_id, id DESC;")
+   if i ==0
+      self.find_by_sql("SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC")
    else
-
-    self.find_by_sql("SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL ORDER BY ticket_id, id DESC")
-
+     if i.is_a? Integer
+        start = iteration_start(i)
+        finish = iteration_end(i)
+      elsif i.is_a? Array
+        start = Helpers.clean_date(i[0])
+        finish = Helpers.clean_date(i[1])
+      else
+        raise ArgumentError
+      end
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE deleted IS NULL AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id, id DESC ) AS x WHERE (x.accepted >= '#{start}' OR x.accepted IS NULL) AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{finish}' ORDER BY ticket_id, id DESC;")
    end
  end
  
  def self.deleted(i)
-   if i !=0
-     start = iteration_start(i)
-     finish = iteration_end(i)
-   else
+   if i ==0
      self.where("deleted IS NOT NULL")
+
+   else
+     if i.is_a? Integer
+        start = iteration_start(i)
+        finish = iteration_end(i)
+      elsif i.is_a? Array
+        start = Helpers.clean_date(i[0])
+        finish = Helpers.clean_date(i[1])
+      else
+        raise ArgumentError
+      end
+     self.find_by_sql("SELECT * FROM (SELECT DISTINCT ON (ticket_id) * FROM stories WHERE (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}') ORDER BY ticket_id ASC, id DESC ) AS x WHERE x.deleted >= '#{start}' AND x.deleted <'#{finish}'")
    end
  end
  

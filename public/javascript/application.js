@@ -17,26 +17,69 @@
       
       var renderers = { // Setup the render types
         'pie': {
-          renderer: jQuery.jqplot.PieRenderer,
-          rendererOptions: {
-            showDataLabels: false,
-            dataLabels: 'label'
-          }
+          seriesDefaults: {
+            renderer: jQuery.jqplot.PieRenderer,
+            rendererOptions: {
+              showDataLabels: false,
+              dataLabels: 'label'
+            }
+          },
+          invertSeries: false,
+          absoluteValues: true
         },
         'stacked-bar': {
-          renderer: jQuery.jqplot.BarRenderer,
-          rendererOptions: {
-            showDataLabels: true,
-            barMargin: 30,
-            dataLabels: 'label'
+          seriesDefaults: {
+            renderer: jQuery.jqplot.BarRenderer,
+            rendererOptions: {
+              showDataLabels: true,
+              barMargin: 30,
+              dataLabels: 'label'
+            }
+          },
+          invertSeries: true,
+          absoluteValues: false,
+          axes: {
+            xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer
+            },
+            yaxis: {
+              padMin: 0,
+              padMax: 0,
+              display: false
+            }
           }
         },
+        'stacked-area': {
+          seriesDefaults: {
+            fill: true
+          },
+          invertSeries: true,
+          absoluteValues: true,
+          axes: {
+            xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              min:0,
+              max:7,
+              numberTicks:8
+            },
+            yaxis: {
+              padMin: 0,
+              padMax: 0,
+              display: false
+            }
+          },
+          defaultAxisStart: 0
+        },
         'default': { // If the type is invalid, we render a pie.
-          renderer: jQuery.jqplot.PieRenderer,
-          rendererOptions: {
-            showDataLabels: false,
-            dataLabels: 'label'
-          }
+          seriesDefaults: {
+            renderer: jQuery.jqplot.PieRenderer,
+            rendererOptions: {
+              showDataLabels: false,
+              dataLabels: 'label'
+            }
+          },
+          invertSeries: false,
+          absoluteValues: true
         }
        
       };
@@ -58,55 +101,41 @@
         var type = chart.getAttribute('data-charttype')
         if (renderers[type]==null) {type='default'}
         
-        // And convert it into a chart
+        // And convert it into a chart...
         
-        var data =[], series_labels=[], ticks = [], axes={}, stotal = [];
-        switch(type) { // Unfortunately chart types take their data inconsistantly.
-          
-          case 'stacked-bar':
-          // jqplot does not provide native support for stacked bar charts in the manner we want. Instead we must adapt the bar chart, which provides series stacking.
-          // example: var data = [[2, 6, 7, 10],[7, 5, 3, 4],[14, 9, 3, 8]]; However! each apparent series is actually an axis in terms of recieved data
-          // ie.[[start1,start2,start3],[finished1,finished2,finished3]]
-          // Furthermore, data need to be manually converted to percentages.
-          // 'Series' labels are given in: series:[{label:'a'},{label:'b'},{label:'c'}]
-          
+        var data =[], series_labels=[], axes={}, stotal = [];
+        
+        if (renderers[type].invertSeries) { // stacked bars etc.
+          renderers[type].axes.xaxis.ticks = []
           for (s=0; s < series.length; s++) { // For each series
-            ticks[s] = series[s][0]; // TODO: Something useful with this
-            stotal[s] = 0;
-            $.each(series[s][1], function() {stotal[s]+=this;})
-            series_labels[s] = {label: axis[i]};
+            renderers[type].axes.xaxis.ticks[s] = series[s][0];
+            series_labels[s] = {label: axis[s]};
+            if (!renderers[type].absoluteValues) {
+              stotal[s] = 0;
+              $.each(series[s][1], function() {stotal[s]+=this;})
+            }  
           }
+          //renderers[type].axes.xaxis.ticks.unshift("...")
           for (i=0; i < axis.length; i++) { // For each item
-            data[i]=[]
+            data[i] = []
             for (s=0; s < series.length; s++) {
-              data[i][s]=(series[s][1][i]/stotal[s])*100;
-            }
-          }
-
-          axes = {
-            xaxis: {
-              renderer: $.jqplot.CategoryAxisRenderer,
-              ticks: ticks
-            },
-            yaxis: {
-              padMax: 0,
-              display: false
-            }
-          }
-          break;
-          
-          case 'pie':
-          // Pie and donut example: var data = [['Segment A', 12],['Segment B', 9], ['Segment C', 14]],[['Segment A2', 12],['Segment B2', 9], ['Segment C2', 14]];
-          default:
-            for (s=0; s<series.length; s++) { // For each series
-              var values =[]
-              for (i=0; i<axis.length; i++) { // For each item
-                values[i]=([axis[i],series[s][1][i]]);
+              if (!renderers[type].absoluteValues) {
+                if (series[s][1][i] != null) {data[i][s]=(series[s][1][i]/stotal[s])*100;}
+              } else {
+                if (series[s][1][i] != null) {data[i][s]=(series[s][1][i]);}
               }
-              data[s]=values;
             }
-          
-          };
+            data[i].unshift(data[i][0])
+          }
+  
+        } else { // Pie charts etc.
+          for (s=0; s<series.length; s++) { // For each series
+            data[s] = []
+            for (i=0; i<axis.length; i++) { // For each item
+              data[s][i]=([axis[i],series[s][1][i]]);
+            }
+          }
+        }
         
         $.jqplot(name+'_chart', data, {
           stackSeries: true,
@@ -118,15 +147,16 @@
             drawGridlines: false
           },
           series: series_labels,
-          axes: axes,
+          axes: renderers[type].axes,
           title: {
             text: title,
             show: true,
           },
-          seriesDefaults: renderers[type],
+          seriesDefaults: renderers[type].seriesDefaults,
           legend: {
             show: false
-          }
+          },
+          defaultAxisStart: renderers[type].defaultAxisStart
         });
       })
   

@@ -18,6 +18,28 @@ module Charts
       }
     end
     
+    def self.chart_time_states(type,name,title,iteration,location)
+      i_start = iteration_start(iteration)
+      series = (0..$SETTINGS['iteration_length']*7-1).map do |i|
+        series_title = ("Day #{i+1}")
+        series_data = []
+        if i_start+i < DateTime.now
+          series_data << Story.created([i_start,i_start+i+1]).length << Story.started([i_start,i_start+i+1]).length << Story.finished([i_start,i_start+i+1]).length << Story.delivered([i_start,i_start+i+1]).length << Story.accepted([i_start,i_start+i+1]).length << Story.rejected([i_start,i_start+i+1]).length
+        else
+          #series_data << 0 << 0 << 0 << 0 << 0 << 0
+        end
+        [series_title,series_data]
+      end
+      return {
+        :location => location,
+        :type => type,
+        :name => name,
+        :title => title,
+        :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
+        :series => series
+      }
+    end
+    
     def self.chart_types(type,name,title,iterations,location)
       series = iterations.map do |i|
         series_title = (i==0) ? ("Project") : ("Iteration #{i}")
