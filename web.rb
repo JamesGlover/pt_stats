@@ -105,6 +105,34 @@ get '/' do
     end
 end
 
+# Display the goods
+get '/overview' do
+  protected!
+  i=current_iteration()
+  charts = []
+  charts << Charts.chart_iterations_states('stacked-area','chart_all_iterations_time','Ticket States History',(1..i),'a')
+  messages = []
+  
+  begin
+  erb :overview, :locals => {
+    :iteration=>i,
+    :iteration_end=> iteration_end(i),
+    :messages => messages,
+    :charts => charts
+    }
+  rescue PGError
+    messages << {
+      :id => 'databaseConnectionIssues',
+      :classes => 'bad',
+      :title => 'Problems Querying Database',
+      :body => "There were problems querying the database"
+    }
+    erb :index, :locals => {
+      :iteration=>i, :messages => messages, :charts => charts
+      }
+    end
+end
+
 get '/populate' do
   protected!
   

@@ -40,6 +40,25 @@ module Charts
       }
     end
     
+    def self.chart_iterations_states(type,name,title,iterations,location) # iterations is a range
+      i_start = iteration_start(iterations.first)
+      series = (iterations).map do |i|
+        series_title = ("Iteration #{i}")
+        diff = (i)*$SETTINGS['iteration_length']*7
+        series_data = []
+        series_data << Story.created([i_start,i_start+diff]).length << Story.started([i_start,i_start+diff]).length << Story.finished([i_start,i_start+diff]).length << Story.delivered([i_start,i_start+diff]).length << Story.accepted([i_start,i_start+diff]).length << Story.rejected([i_start,i_start+diff]).length
+        [series_title,series_data]
+      end
+      return {
+        :location => location,
+        :type => type,
+        :name => name,
+        :title => title,
+        :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
+        :series => series
+      }
+    end
+    
     def self.chart_types(type,name,title,iterations,location)
       series = iterations.map do |i|
         series_title = (i==0) ? ("Project") : ("Iteration #{i}")

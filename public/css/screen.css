@@ -112,3 +112,11 @@ th.rowhead {
   float:right;
   clear:right;
 }
+
+#long_term {
+  width:100%;
+}
+
+#chart_all_iterations_time_chart {
+  width: 90%;
+}

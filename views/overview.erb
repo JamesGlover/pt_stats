@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+  <head>
+    <title>Project Overview: <%= $SETTINGS["project_name"] %></title>
+    <link rel="stylesheet" type="text/css" href="css/screen.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jquery.jqplot.min.css"/>
+  </head>
+  <body id="overview" class="<%= ENV['RACK_ENV'] || 'development' %>">
+    <h1><%= $SETTINGS["project_name"] %></h1>
+    <!--<%= if ENV['RACK_ENV'] != 'production'
+      "<h2> #{ENV['RACK_ENV'] || 'development'} environment</h2>"
+      end %>-->
+      <div id='iteration_navigation'><div id="iteration"><h2>Iteration</h2><span id='itno'><%= iteration %></span><span id='itdate'><br/><%= iteration_end.strftime("%-d %b") %></span></div>
+      <ul id='navigation'><li><a href='populate'>Manage database</a></li><li><a href='./'>Statistics</a></li>
+      </ul>
+        <!--<li>Detailed stats</li>--></div>
+    <div id="long_term">
+      <%= chart_render(charts,'a') %>
+    </div>
+    <!--<div id="tandc_container">-->
+    <div id="chart_container_b" class="chart_container"><%= chart_render(charts,'b') %></div>
+    
+    <div id="message_centre">
+    <%= message_render(messages) if defined? messages %>
+    </div>
+    <!--[if lt IE 9]><script src='./javascript/excanvas.min.js' type="text/javascript" charset="utf-8"></script><![endif]-->
+    <script src='./javascript/jqplot/jquery.min.js' type="text/javascript" charset="utf-8"></script>
+    <script src='./javascript/jqplot/jquery.jqplot.min.js' type="text/javascript" charset="utf-8"></script>
+    <script src='./javascript/jqplot/plugins/jqplot.pieRenderer.min.js' type="text/javascript" charset="utf-8"></script>
+    <script src='./javascript/jqplot/plugins/jqplot.barRenderer.min.js' type="text/javascript" charset="utf-8"></script>
+    <script src='./javascript/jqplot/plugins/jqplot.categoryAxisRenderer.min.js' type="text/javascript" charset="utf-8"></script>
+    <script src='./javascript/application.js' type="text/javascript" charset="utf-8"></script>
+  </body>
+</html>

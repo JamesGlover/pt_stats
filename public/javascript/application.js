@@ -6,7 +6,7 @@
 
   $(function () {
     // jQuery Document Ready
-    var colours, renderers;
+    var colours, renderers, options;
     // To keep things consistent we'll read our colour array in from the document itself.
     // Fallback to defaults if we can't find anything.
     colours = [
@@ -22,91 +22,136 @@
 
       // Setup the render types
       'pie': {
-        seriesDefaults: {
-          renderer: jQuery.jqplot.PieRenderer,
-          rendererOptions: {
-            showDataLabels: false,
-            dataLabels: 'label'
+        renderOptions: {
+          seriesDefaults: {
+            renderer: jQuery.jqplot.PieRenderer,
+            rendererOptions: {
+              showDataLabels: false,
+              dataLabels: 'label'
+            }
           }
         },
-        invertSeries: false,
-        absoluteValues: true
+        dataOptions: {
+          invertSeries: false,
+          absoluteValues: true
+        }
       },
 
       'stacked-bar': {
-        seriesDefaults: {
-          renderer: jQuery.jqplot.BarRenderer,
-          rendererOptions: {
-            showDataLabels: true,
-            barMargin: 30,
-            dataLabels: 'label'
+        renderOptions: {
+          seriesDefaults: {
+            renderer: jQuery.jqplot.BarRenderer,
+            rendererOptions: {
+              showDataLabels: true,
+              barMargin: 30,
+              dataLabels: 'label'
+            }
+          },
+          axes: {
+            xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer
+            },
+            yaxis: {
+              padMin: 0,
+              padMax: 0,
+              display: false
+            }
           }
         },
-        invertSeries: true,
-        absoluteValues: false,
-        axes: {
-          xaxis: {
-            renderer: $.jqplot.CategoryAxisRenderer
-          },
-          yaxis: {
-            padMin: 0,
-            padMax: 0,
-            display: false
-          }
+        dataOptions: {
+          invertSeries: true,
+          absoluteValues: false
         }
       },
 
       'stacked-area': {
-        seriesDefaults: {
-          fill: true
-        },
-        invertSeries: true,
-        absoluteValues: true,
-        axes: {
-          xaxis: {
-            renderer: $.jqplot.CategoryAxisRenderer,
-            min: 0,
-            //max: 7,
-            //numberTicks: 8
+        renderOptions: {
+          seriesDefaults: {
+            fill: true
           },
-          yaxis: {
-            padMin: 0,
-            padMax: 0,
-            display: false
-          }
+          axes: {
+            xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              min: 0,
+              //max: 7,
+              //numberTicks: 8
+            },
+            yaxis: {
+              padMin: 0,
+              padMax: 0,
+              display: false
+            }
+          },
+          defaultAxisStart: 0
         },
-        defaultAxisStart: 0
+        dataOptions: {
+          invertSeries: true,
+          absoluteValues: true
+        }
       },
 
-      'default': {
-        // If the type is invalid, we render a pie.
-        seriesDefaults: {
-          renderer: jQuery.jqplot.PieRenderer,
-          rendererOptions: {
-            showDataLabels: false,
-            dataLabels: 'label'
+      'default':  { // A Pie!
+        renderOptions: {
+          seriesDefaults: {
+            renderer: jQuery.jqplot.PieRenderer,
+            rendererOptions: {
+              showDataLabels: false,
+              dataLabels: 'label'
+            }
           }
         },
-        invertSeries: false,
-        absoluteValues: true
+        dataOptions: {
+          invertSeries: false,
+          absoluteValues: true
+        }
       }
 
+    };
+    
+    options = {
+      stackSeries: true,
+      seriesColors: colours,
+      grid: {
+        borderWidth: 0,
+        shadow: false,
+        background: 'transparent',
+        drawGridlines: false
+      },
+      series: [],
+      title: {
+        text: null,
+        show: true
+      },
+      legend: {
+        show: false
+      }
     };
 
     // Automatically parse chart divs, using the contained tabulated data
     $('.chart').each(function () {
 
-      var name, title, axis, series, type, data = [], series_labels = [], stotal = [], s, i;
+      var name, axis, series, type, data = [], series_labels = [], stotal = [], s, i, local_options;
 
+      
       // Get the data from the document
       if (this.getAttribute('data-chartname') === null) {
         return;
       }
+      
+      type = this.getAttribute('data-charttype');
+      if (renderers[type] === null) {
+        type = 'default';
+      }
+      
+      var local_options = jQuery.extend(renderers[type].renderOptions, options);
+      
       name = this.getAttribute('data-chartname');
-      title = $('#' + name + '_title')[0].textContent;
+      local_options.title.text = $('#' + name + '_title')[0].textContent;
+      
       axis = $('#' + name + '_head').children('.axis_label').map(function () { // Each axis label
         return this.textContent;
       }).get();
+      
       series = $('#' + name + '_body').children('tr').map(function () { // Each series
         var s = [];
         s[0] = $(this).children('th').get(0).textContent;
@@ -117,33 +162,29 @@
         //series data
         return [s];
       }).get();
-      type = this.getAttribute('data-charttype');
 
-      if (renderers[type] === null) {
-        type = 'default';
-      }
-
+      
       // And convert it into a chart...
-      if (renderers[type].invertSeries) {
+      if (renderers[type].dataOptions.invertSeries) {
         // stacked bars etc.
-        renderers[type].axes.xaxis.ticks = [];
+        local_options.axes.xaxis.ticks = [];
         for (s = 0; s < series.length; s += 1) {
           // For each series
-          renderers[type].axes.xaxis.ticks[s] = series[s][0];
-          series_labels[s] = { label: axis[s] };
-          if (!renderers[type].absoluteValues) {
+          local_options.axes.xaxis.ticks[s] = series[s][0];
+          local_options.series[s] = { label: axis[s] };
+          if (!renderers[type].dataOptions.absoluteValues) {
             stotal[s] = 0;
             for (i = 0; i < series[s][1].length; i += 1) {
               stotal[s] += series[s][1][i];
             }
           }
         }
-        //renderers[type].axes.xaxis.ticks.unshift("...")
+
         for (i = 0; i < axis.length; i += 1) {
           // For each item
           data[i] = [];
           for (s = 0; s < series.length; s += 1) {
-            if (!renderers[type].absoluteValues) {
+            if (!renderers[type].dataOptions.absoluteValues) {
               if (series[s][1][i] !== undefined) {
                 data[i][s] = (series[s][1][i] / stotal[s]) * 100;
               }
@@ -168,27 +209,7 @@
         }
       }
 
-      $.jqplot(name + '_chart', data, {
-        stackSeries: true,
-        seriesColors: colours,
-        grid: {
-          borderWidth: 0,
-          shadow: false,
-          background: 'transparent',
-          drawGridlines: false
-        },
-        series: series_labels,
-        axes: renderers[type].axes,
-        title: {
-          text: title,
-          show: true
-        },
-        seriesDefaults: renderers[type].seriesDefaults,
-        legend: {
-          show: false
-        },
-        defaultAxisStart: renderers[type].defaultAxisStart
-      });
+      $.jqplot(name + '_chart', data, local_options);
     });
 
     // End Document Read
