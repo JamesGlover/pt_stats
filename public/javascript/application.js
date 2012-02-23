@@ -66,8 +66,8 @@
           xaxis: {
             renderer: $.jqplot.CategoryAxisRenderer,
             min: 0,
-            max: 7,
-            numberTicks: 8
+            //max: 7,
+            //numberTicks: 8
           },
           yaxis: {
             padMin: 0,
