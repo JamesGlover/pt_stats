@@ -110,7 +110,8 @@ get '/overview' do
   protected!
   i=current_iteration()
   charts = []
-  charts << Charts.chart_iterations_states('stacked-area','chart_all_iterations_time','Ticket States History',(1..i),'a')
+  charts << Charts.chart_iterations_states('stacked-area','chart_all_iterations_time','Ticket States History',(0..i),'a',
+    '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}')
   messages = []
   
   begin

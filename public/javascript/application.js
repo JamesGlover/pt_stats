@@ -72,9 +72,7 @@
           axes: {
             xaxis: {
               renderer: $.jqplot.CategoryAxisRenderer,
-              min: 0,
-              //max: 7,
-              //numberTicks: 8
+              min: 0
             },
             yaxis: {
               padMin: 0,
@@ -86,7 +84,8 @@
         },
         dataOptions: {
           invertSeries: true,
-          absoluteValues: true
+          absoluteValues: true,
+          zeroShift: true
         }
       },
 
@@ -107,51 +106,57 @@
       }
 
     };
-    
+
     options = {
-      stackSeries: true,
-      seriesColors: colours,
-      grid: {
-        borderWidth: 0,
-        shadow: false,
-        background: 'transparent',
-        drawGridlines: false
-      },
-      series: [],
-      title: {
-        text: null,
-        show: true
-      },
-      legend: {
-        show: false
+      renderOptions: {
+        stackSeries: true,
+        seriesColors: colours,
+        grid: {
+          borderWidth: 0,
+          shadow: false,
+          background: 'transparent',
+          drawGridlines: false
+        },
+        series: [],
+        title: {
+          text: null,
+          show: true
+        },
+        legend: {
+          show: false
+        }
       }
     };
 
     // Automatically parse chart divs, using the contained tabulated data
     $('.chart').each(function () {
 
-      var name, axis, series, type, data = [], series_labels = [], stotal = [], s, i, local_options;
+      var name, axis, series, type, data = [], stotal = [], s, i, local_options;
 
-      
       // Get the data from the document
       if (this.getAttribute('data-chartname') === null) {
         return;
       }
-      
+
       type = this.getAttribute('data-charttype');
       if (renderers[type] === null) {
         type = 'default';
       }
-      
-      var local_options = jQuery.extend(renderers[type].renderOptions, options);
-      
+
       name = this.getAttribute('data-chartname');
-      local_options.title.text = $('#' + name + '_title')[0].textContent;
-      
+
+      local_options = {
+        renderOptions: {},
+        dataOptions: {}
+      };
+      $.extend(true, local_options, options, renderers[type], JSON.parse($('#' + name + '_json')[0].textContent)); // Read in the options
+      console.log(JSON.stringify(local_options))
+      local_options.renderOptions.title.text = $('#' + name + '_title')[0].textContent;
+
       axis = $('#' + name + '_head').children('.axis_label').map(function () { // Each axis label
         return this.textContent;
       }).get();
-      
+
       series = $('#' + name + '_body').children('tr').map(function () { // Each series
         var s = [];
         s[0] = $(this).children('th').get(0).textContent;
@@ -163,16 +168,15 @@
         return [s];
       }).get();
 
-      
       // And convert it into a chart...
-      if (renderers[type].dataOptions.invertSeries) {
+      if (local_options.dataOptions.invertSeries) {
         // stacked bars etc.
-        local_options.axes.xaxis.ticks = [];
+        local_options.renderOptions.axes.xaxis.ticks = [];
         for (s = 0; s < series.length; s += 1) {
           // For each series
-          local_options.axes.xaxis.ticks[s] = series[s][0];
-          local_options.series[s] = { label: axis[s] };
-          if (!renderers[type].dataOptions.absoluteValues) {
+          local_options.renderOptions.axes.xaxis.ticks[s] = series[s][0];
+          local_options.renderOptions.series[s] = { label: axis[s] };
+          if (!local_options.dataOptions.absoluteValues) {
             stotal[s] = 0;
             for (i = 0; i < series[s][1].length; i += 1) {
               stotal[s] += series[s][1][i];
@@ -184,7 +188,7 @@
           // For each item
           data[i] = [];
           for (s = 0; s < series.length; s += 1) {
-            if (!renderers[type].dataOptions.absoluteValues) {
+            if (!local_options.dataOptions.absoluteValues) {
               if (series[s][1][i] !== undefined) {
                 data[i][s] = (series[s][1][i] / stotal[s]) * 100;
               }
@@ -194,7 +198,7 @@
               }
             }
           }
-          data[i].unshift(data[i][0]);
+          if (local_options.dataOptions.zeroShift) {data[i].unshift(data[i][0]);}
         }
 
       } else {
@@ -208,8 +212,10 @@
           }
         }
       }
-
-      $.jqplot(name + '_chart', data, local_options);
+      
+      if (local_options.dataOptions.shiftAxis) {local_options.renderOptions.axes.xaxis.ticks.shift();}
+      console.log(JSON.stringify(data))
+      $.jqplot(name + '_chart', data, local_options.renderOptions);
     });
 
     // End Document Read

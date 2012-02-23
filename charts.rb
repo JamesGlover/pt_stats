@@ -1,7 +1,7 @@
 # Ruby charts module for providing chart data
 module Charts
     
-    def self.chart_states(type,name,title,iterations,location)
+    def self.chart_states(type,name,title,iterations,location, properties='')
       series = iterations.map do |i|
         series_title = (i==0) ? ("Project") : ("Iteration #{i}")
         series_data = []
@@ -14,11 +14,12 @@ module Charts
         :name => name,
         :title => title,
         :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series
+        :series => series,
+        :properties => properties
       }
     end
     
-    def self.chart_time_states(type,name,title,iteration,location)
+    def self.chart_time_states(type,name,title,iteration,location, properties='')
       i_start = iteration_start(iteration)
       series = (0..$SETTINGS['iteration_length']*7-1).map do |i|
         series_title = ("Day #{i+1}")
@@ -36,11 +37,12 @@ module Charts
         :name => name,
         :title => title,
         :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series
+        :series => series,
+        :properties => properties
       }
     end
     
-    def self.chart_iterations_states(type,name,title,iterations,location) # iterations is a range
+    def self.chart_iterations_states(type,name,title,iterations,location, properties='') # iterations is a range
       i_start = iteration_start(iterations.first)
       series = (iterations).map do |i|
         series_title = ("Iteration #{i}")
@@ -55,11 +57,12 @@ module Charts
         :name => name,
         :title => title,
         :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series
+        :series => series,
+        :properties => properties
       }
     end
     
-    def self.chart_types(type,name,title,iterations,location)
+    def self.chart_types(type,name,title,iterations,location, properties='')
       series = iterations.map do |i|
         series_title = (i==0) ? ("Project") : ("Iteration #{i}")
         series_data = []
@@ -72,7 +75,8 @@ module Charts
         :name => name,
         :title => title,
         :axis => ['Bug','Feature','Chore','Release'],
-        :series => series
+        :series => series,
+        :properties => properties
       }
     end
     

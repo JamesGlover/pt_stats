@@ -50,7 +50,7 @@ module Helpers
           end
           chart_string << "</tr>"
         end
-        chart_string << "</tbody></table></div>"
+        chart_string << "<span id='#{chart[:name].gsub(/ /,'_')}_json' class='json'>{#{chart[:properties]}}</span></tbody></table></div>"
       end
       return chart_string
     end

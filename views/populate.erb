@@ -12,8 +12,8 @@
       end %>
     <h2>Database population tool</h2>
       <div id='iteration_navigation'><div id="iteration"><h2>Iteration</h2><span id='itno'><%= iteration %></span><span id='itdate'><br/><%= iteration_end.strftime("%-d %b") %></span></div>
-      <ul id='navigation'><li><a href='./'>Statistics</a></li></ul>
-        <!--<li>Detailed stats</li>--></div>
+      <ul id='navigation'><li><a href='./'>Statistics</a></li><li><a href='overview'>Overview</a></li></ul>
+      </div>
     <form action='populate' method='post'>
       <div id='description' class='information neutral'>
         <p>This page allows you to populate the database with existing stories. It should be run before Pivotal Tracker post hooks are set up, to ensure that stories

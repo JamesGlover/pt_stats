@@ -24,7 +24,7 @@ label {
 
 .information {
   padding:1em;
-  width:100%;
+  width:90%;
   margin: 1em auto;
   display:block;
   border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
@@ -68,6 +68,7 @@ th.rowhead {
   border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
   background:#E4E4E4;
   font-size:small;
+  z-index: 100;
 }
 
 #iteration_navigation ul{
@@ -98,15 +99,10 @@ th.rowhead {
   width: 300px;
   height: 300px;
 }
-.chart table {
+.chart table, .json {
   display:none;
 }
 
-/*#chart_container_a {
-  position: absolute;
-  left: 15px;
-  top: 100px;
-}*/
 #chart_container_c {
   position: block;
   float:right;
@@ -115,8 +111,12 @@ th.rowhead {
 
 #long_term {
   width:100%;
+  overflow:auto;
 }
 
 #chart_all_iterations_time_chart {
   width: 90%;
+  margin: 1em auto;
+  position: block;
+  float:none;
 }

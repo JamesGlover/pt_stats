@@ -13,7 +13,7 @@
       "<h2> #{ENV['RACK_ENV'] || 'development'} environment</h2>"
       end %>-->
       <div id='iteration_navigation'><div id="iteration"><h2>Iteration</h2><span id='itno'><%= iteration %></span><span id='itdate'><br/><%= iteration_end.strftime("%-d %b") %></span></div>
-      <ul id='navigation'><li><a href='populate'>Manage database</a></li></ul>
+      <ul id='navigation'><li><a href='populate'>Manage database</a></li><!--<li><a href='overview'>Overview</a></li>--></ul>
         <!--<li>Detailed stats</li>--></div>
     <div id="iteration_charts">
       <%= chart_render(charts,'a') %>
