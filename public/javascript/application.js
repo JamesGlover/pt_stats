@@ -130,9 +130,7 @@
         for (s = 0; s < series.length; s += 1) {
           // For each series
           renderers[type].axes.xaxis.ticks[s] = series[s][0];
-          series_labels[s] = {
-            label: axis[s]
-          };
+          series_labels[s] = { label: axis[s] };
           if (!renderers[type].absoluteValues) {
             stotal[s] = 0;
             for (i = 0; i < series[s][1].length; i += 1) {
@@ -146,11 +144,11 @@
           data[i] = [];
           for (s = 0; s < series.length; s += 1) {
             if (!renderers[type].absoluteValues) {
-              if (series[s][1][i] !== null) {
+              if (series[s][1][i] !== undefined) {
                 data[i][s] = (series[s][1][i] / stotal[s]) * 100;
               }
             } else {
-              if (series[s][1][i] !== null) {
+              if (series[s][1][i] !== undefined) {
                 data[i][s] = (series[s][1][i]);
               }
             }
