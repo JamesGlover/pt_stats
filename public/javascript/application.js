@@ -44,7 +44,8 @@
             rendererOptions: {
               showDataLabels: true,
               barMargin: 30,
-              dataLabels: 'label'
+              dataLabels: 'label',
+              barWidth: 100
             }
           },
           axes: {
@@ -150,7 +151,7 @@
         dataOptions: {}
       };
       $.extend(true, local_options, options, renderers[type], JSON.parse($('#' + name + '_json')[0].textContent)); // Read in the options
-      console.log(JSON.stringify(local_options))
+
       local_options.renderOptions.title.text = $('#' + name + '_title')[0].textContent;
 
       axis = $('#' + name + '_head').children('.axis_label').map(function () { // Each axis label
@@ -214,7 +215,6 @@
       }
       
       if (local_options.dataOptions.shiftAxis) {local_options.renderOptions.axes.xaxis.ticks.shift();}
-      console.log(JSON.stringify(data))
       $.jqplot(name + '_chart', data, local_options.renderOptions);
     });
 
