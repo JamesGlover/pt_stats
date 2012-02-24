@@ -125,7 +125,6 @@ class ServerTests < Test::Unit::TestCase
     Story.delete_all()
   end
 
-
 end
 
 class XmlTests < Test::Unit::TestCase
