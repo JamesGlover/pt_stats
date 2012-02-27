@@ -1,6 +1,4 @@
 # Pivotal Tracker stats analyzer and information radiator
-# TODO: Clean up the source a bit so that this file is a container
-# and initializer.
 
 # Setup external requirements
 require 'sinatra'

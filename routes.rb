@@ -31,25 +31,25 @@ get '/' do
     }
   end
   begin
-  erb :index, :locals => {
-    :project_created => Story.created(0).length,
-    :project_rejected => Story.rejected(0).length,
-    :project_started => Story.started(0).length,
-    :project_finished => Story.finished(0).length,
-    :project_delivered => Story.delivered(0).length,
-    :project_accepted => Story.accepted(0).length,
-    :project_total => Story.total(0).length,
-    :iteration=>i,
-    :iteration_end=> iteration_end(i),
-    :iteration_created => Story.created(i).length,
-    :iteration_rejected => Story.rejected(i).length,
-    :iteration_started => Story.started(i).length,
-    :iteration_finished => Story.finished(i).length,
-    :iteration_delivered => Story.delivered(i).length,
-    :iteration_accepted => Story.accepted(i).length,
-    :iteration_total => Story.total(i).length,
-    :messages => messages,
-    :charts => charts
+    erb :index, :locals => {
+      :project_created => Story.created(0).length,
+      :project_rejected => Story.rejected(0).length,
+      :project_started => Story.started(0).length,
+      :project_finished => Story.finished(0).length,
+      :project_delivered => Story.delivered(0).length,
+      :project_accepted => Story.accepted(0).length,
+      :project_total => Story.total(0).length,
+      :iteration=>i,
+      :iteration_end=> iteration_end(i),
+      :iteration_created => Story.created(i).length,
+      :iteration_rejected => Story.rejected(i).length,
+      :iteration_started => Story.started(i).length,
+      :iteration_finished => Story.finished(i).length,
+      :iteration_delivered => Story.delivered(i).length,
+      :iteration_accepted => Story.accepted(i).length,
+      :iteration_total => Story.total(i).length,
+      :messages => messages,
+      :charts => charts
     }
   rescue PGError
     messages << {
@@ -65,8 +65,8 @@ get '/' do
       :iteration_created => 0, :iteration_rejected => 0, :iteration_started => 0,
       :iteration_finished => 0, :iteration_delivered => 0, :iteration_accepted => 0,
       :iteration_total => 0, :messages => messages, :charts => charts
-      }
-    end
+    }
+  end
 end
 
 # Display the goods
@@ -75,15 +75,15 @@ get '/overview' do
   i=current_iteration()
   charts = []
   charts << Charts.chart_iterations_states('stacked-area','chart_all_iterations_time','Ticket States History',(0..i),'a',
-    '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}')
+  '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}')
   messages = []
-  
+
   begin
-  erb :overview, :locals => {
-    :iteration=>i,
-    :iteration_end=> iteration_end(i),
-    :messages => messages,
-    :charts => charts
+    erb :overview, :locals => {
+      :iteration=>i,
+      :iteration_end=> iteration_end(i),
+      :messages => messages,
+      :charts => charts
     }
   rescue PGError
     messages << {
@@ -94,20 +94,19 @@ get '/overview' do
     }
     erb :index, :locals => {
       :iteration=>i, :messages => messages, :charts => charts
-      }
-    end
+    }
+  end
 end
 
 get '/populate' do
   protected!
-  
   pop_interface([],$SETTINGS['api_token']);
 end
 
 post '/populate' do
   protected!
   messages=[]
-  
+
   if params[:api_key] == ''
     messages << {
       :id => "no_api_key",
@@ -137,7 +136,7 @@ post '/populate' do
       If you were not using the web interface to update the database, please ensure your request is valid."
     }
   end
-  
+
   pop_interface(messages, params[:api_key]);
 end
 

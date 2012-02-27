@@ -1,8 +1,8 @@
 // Pivotal tracker stats analysis
-(function (jQuery) {
+(function ($) {
   //Wrapper
   "use strict";
-  var $ = jQuery;
+  //var $ = jQuery;
 
   $(function () {
     // jQuery Document Ready
@@ -24,7 +24,7 @@
       'pie': {
         renderOptions: {
           seriesDefaults: {
-            renderer: jQuery.jqplot.PieRenderer,
+            renderer: $.jqplot.PieRenderer,
             rendererOptions: {
               showDataLabels: false,
               dataLabels: 'label'
@@ -40,7 +40,7 @@
       'stacked-bar': {
         renderOptions: {
           seriesDefaults: {
-            renderer: jQuery.jqplot.BarRenderer,
+            renderer: $.jqplot.BarRenderer,
             rendererOptions: {
               showDataLabels: true,
               barMargin: 30,
@@ -93,7 +93,7 @@
       'default':  { // A Pie!
         renderOptions: {
           seriesDefaults: {
-            renderer: jQuery.jqplot.PieRenderer,
+            renderer: $.jqplot.PieRenderer,
             rendererOptions: {
               showDataLabels: false,
               dataLabels: 'label'
