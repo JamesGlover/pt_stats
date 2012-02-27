@@ -159,10 +159,35 @@ class Story < ActiveRecord::Base
     types(i,'release')
   end
   
-  def problem_tickets(i)
+  def self.problem_tickets(i)
     # Problem tickets returns a has of tickets that may need special attention
     # Main selector = Started in previous iterations not rejected or finished
-    # Tickets with more than one rejection
+    # Tickets with more than one rejection TODO: Adjust function to be iteration aware
+    i = i || current_iteration()
+    old_and_stalled_tickets(i)|rejected_more_than(1)
+  end
+  
+  def self.old_and_stalled_tickets(i)
+    self.find_by_sql("
+      SELECT * FROM 
+        (SELECT DISTINCT ON (ticket_id) *
+        FROM stories 
+        WHERE deleted IS NULL 
+        ORDER BY ticket_id, id DESC)
+      AS x 
+        WHERE (x.rejected IS NULL OR x.rejected > '#{iteration_end(i)}')
+          AND (x.accepted IS NULL OR x.rejected > '#{iteration_end(i)}')
+          AND COALESCE(x.started, x.finished, x.delivered) < '#{iteration_start(i)}'
+        ORDER BY ticket_id, id DESC;")
+  end
+  
+  def self.rejected_more_than(count)
+    self.find_by_sql("
+      SELECT * FROM stories 
+        WHERE id IN (SELECT max(id) FROM stories
+            WHERE deleted IS NULL
+            GROUP BY ticket_id
+              HAVING count(distinct rejected)>#{count});")
   end
 
   # Methods

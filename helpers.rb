@@ -1,7 +1,7 @@
 module Helpers
-  
+
   helpers do
-    
+
     def protected!
       unless authorized?
         response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
@@ -19,7 +19,7 @@ module Helpers
         end    
       end
     end
-    
+
     def message_render(messages)
       message_string = ""
       messages.each do |message|
@@ -29,16 +29,16 @@ module Helpers
       end
       message_string
     end
-    
+
     def chart_render(charts,location)
       # Will generate a div representing the chart data
       chart_string = ""
       charts.each do |chart|
         next if chart[:location] != location # Skip if it belongs elsewhere
         chart_string << "<div class='chart #{chart[:type]}' id='#{chart[:name].gsub(/ /,'_')}_chart' data-charttype='#{chart[:type]}' data-chartname='#{chart[:name].gsub(/ /,'_')}'>
-                        <table id='#{chart[:name].gsub(/ /,'_')}_data'>
-                        <caption id='#{chart[:name].gsub(/ /,'_')}_title'>#{chart[:title]}</caption>
-                        <thead><tr id='#{chart[:name].gsub(/ /,'_')}_head'><th scope='col'>series</th>"
+        <table id='#{chart[:name].gsub(/ /,'_')}_data'>
+        <caption id='#{chart[:name].gsub(/ /,'_')}_title'>#{chart[:title]}</caption>
+        <thead><tr id='#{chart[:name].gsub(/ /,'_')}_head'><th scope='col'>series</th>"
         chart[:axis].each do |axis|
           chart_string<< "<th scope='col' class='axis_label'>#{axis}</th>"
         end
@@ -62,7 +62,7 @@ module Helpers
       end
       stories_string << '</ul>'
     end
-    
+
     def pop_interface(messages,api)
       database_count = Story.count
       if database_count >0
@@ -89,9 +89,9 @@ module Helpers
         :iteration_end=> iteration_end(i)
       }
     end
-    
+
   end
-  
+
   def clean_date(date)
     if date.class == String
       return DateTime.parse(date)
@@ -101,24 +101,24 @@ module Helpers
       return nil
     end
   end
-  
+
   def iteration_start(i)
     seed = DateTime.parse($SETTINGS['iteration_seed'])
     seed+ (i-1)*7*$SETTINGS['iteration_length']
   end
-  
+
   def iteration_end(i)
     seed = DateTime.parse($SETTINGS['iteration_seed'])
     seed+ (i)*7*$SETTINGS['iteration_length']
   end
-  
+
   def current_iteration()
     get_iteration(DateTime.now)
   end
-  
+
   def get_iteration(time)
     diff = time - DateTime.parse($SETTINGS['iteration_seed'])
     (diff.to_i/(7*$SETTINGS['iteration_length']))+1
   end
-  
+
 end

@@ -79,4 +79,25 @@ module TestHelpers
       Story.count ]
       assert(expected==actual, "Expected:\nCreated:#{expected[0]}, Started:#{expected[1]}, Finished:#{expected[2]}, Delivered:#{expected[3]}, Accepted:#{expected[4]}, Rejected:#{expected[5]}, Total:#{expected[6]}, Count:#{expected[7]}\n Saw:\nCreated:#{actual[0]}, Started:#{actual[1]}, Finished:#{actual[2]}, Delivered:#{actual[3]}, Accepted:#{actual[4]}, Rejected:#{actual[5]}, Total:#{actual[6]}, Count:#{actual[7]}")
   end
+  
+  def current_iteration(i)
+    provide_time('2012-02-09 [14:31:32]',i)
+  end
+
+  def previous_iteration(i)
+    provide_time('2012-02-01 [14:31:32]',i)
+  end
+  
+  def very_old_iteration(i)
+    provide_time('2010-02-01 [14:31:32]',i)
+  end
+  
+  def subsequent_iteration(i)
+    provide_time('2012-02-15 [14:31:32]',i)
+  end
+  
+  def provide_time(t,i)
+    (DateTime.parse(t).advance(:seconds => i)).to_s
+  end
+  
 end
