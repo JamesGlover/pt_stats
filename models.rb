@@ -28,7 +28,7 @@ class Story < ActiveRecord::Base
   @environment = 'production' if ENV['DATABASE_URL']
 
   def self.select_state(state,i)
-    states = ['created', 'started', 'finished', 'delivered', 'accepted', 'rejected']
+    states = Helpers.state_array(false).reverse
     return [] unless states.include? state
     states.slice!(0..states.index(state))
     if i==0
@@ -159,11 +159,10 @@ class Story < ActiveRecord::Base
     types(i,'release')
   end
   
-  def self.problem_tickets(i)
+  def self.problem_tickets(i=current_iteration())
     # Problem tickets returns a has of tickets that may need special attention
     # Main selector = Started in previous iterations not rejected or finished
     # Tickets with more than one rejection TODO: Adjust function to be iteration aware
-    i = i || current_iteration()
     old_and_stalled_tickets(i)|rejected_more_than(1)
   end
   
@@ -185,16 +184,16 @@ class Story < ActiveRecord::Base
     self.find_by_sql("
       SELECT * FROM stories 
         WHERE id IN (SELECT max(id) FROM stories
-            WHERE deleted IS NULL
-            GROUP BY ticket_id
-              HAVING count(distinct rejected)>#{count});")
+          WHERE deleted IS NULL
+          GROUP BY ticket_id
+            HAVING count(distinct rejected)>#{count})
+        AND accepted IS NULL;")
   end
 
   # Methods
 
   def state()
-    states = ['deleted','rejected','accepted','delivered','finished','started','created']
-    states.each do |s|
+    Helpers.state_array.each do |s|
       if self.send (s+'?')
         return s
       end
@@ -203,7 +202,7 @@ class Story < ActiveRecord::Base
 
   def update_state(new_state,date)
     date = Helpers.clean_date(date)
-    states = ['rejected','accepted','delivered','finished','started','created']
+    states = Helpers.state_array(false)
     new_state = 'created' if new_state == 'unstarted' || new_state == 'unscheduled'
     return false unless states.include?(new_state)
     return false if self.state == new_state # Don't bother updating state if it hasn't changed.
@@ -243,6 +242,44 @@ class Story < ActiveRecord::Base
   def rejection_count()
     Story.where("ticket_id = ? AND rejected IS NOT NULL AND deleted IS NULL",self.ticket_id).length
   end
+  
+  def find_ticket_stack()
+    Story.find_all_by_ticket_id_and_deleted(self.ticket_id,nil, :order=> 'id DESC')
+  end
+  
+  def custom_getter(attribute,iterate)
+    if iterate
+      return read_attribute(attribute) if read_attribute(attribute) != nil
+      return nil if (Helpers.state_array.index(attribute)<=Helpers.state_array.index(self.state))
+      stack = find_ticket_stack
+      return nil if stack.length == 0
+      (stack.index(self)..stack.length).each do |i|
+        return stack[i].read_attribute(attribute) if stack[i].read_attribute(attribute) != nil
+      end
+    else
+      read_attribute(attribute)
+    end
+  end
+  
+  def created(iterate=false)
+    custom_getter("created",iterate)
+  end
+  def started(iterate=false)
+    custom_getter("started",iterate)
+  end
+  def finished(iterate=false)
+    custom_getter("finished",iterate)
+  end
+  def delivered(iterate=false)
+    custom_getter("delivered",iterate)
+  end
+  def accepted(iterate=false)
+    custom_getter("accepted",iterate)
+  end
+  def rejected(iterate=false)
+    custom_getter("rejected",iterate)
+  end
+
 
   def ori_created()
     Story.where('ticket_id=?',ticket_id).order('id ASC').first.created
@@ -263,6 +300,12 @@ class Story < ActiveRecord::Base
     Story.find_all_by_ticket_id(self.ticket_id).each do |s|
       s.deleted= date
       s.save
+    end
+  end
+  
+  def last_action() # Returns DateTime of latest state change
+    Helpers.state_array.each do |state|
+      return self[state] if self[state] != nil
     end
   end
 

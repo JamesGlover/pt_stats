@@ -1,4 +1,7 @@
 module TestHelpers
+  
+  include SinatraHelpers
+  
   def provide_stories()
     Story.create!(
     :ticket_id=>1,

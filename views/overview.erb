@@ -20,7 +20,10 @@
     </div>
     <!--<div id="tandc_container">-->
     <div id="chart_container_b" class="chart_container"><%= chart_render(charts,'b') %></div>
-    
+    <div id="problem_tickets">
+      <h2>Problem Tickets</h2>
+      <%= draw_problem_tickets() %>
+    </div>
     <div id="message_centre">
     <%= message_render(messages) if defined? messages %>
     </div>

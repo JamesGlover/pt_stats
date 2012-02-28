@@ -1,122 +1,205 @@
 
-* {margin:0;padding:0;}
-body {font-family: helvetica, arial, sans-serif; text-align:center; margin-top:3em;}
-H1, H2, H3 { margin:1em 0 0.5em 0;}
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: helvetica, arial, sans-serif;
+  text-align: center;
+  margin-top: 3em;
+}
+H1, H2, H3 {
+  margin: 5px;
+}
 
-.development H1 {color:red;}
-.jqplot-data-label {color: black}
+.development H1 {
+  color: red;
+}
+.jqplot-data-label {
+  color: black
+}
 
 input {
-  border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
   border: 0;
-  padding:0.5em;
+  padding: 0.5em;
   font-size: large;
-  }
+}
 label {
-  clear:both;
-  display:block;
+  clear: both;
+  display: block;
   padding: 1em 0 0.5em 0;
 }
 .tile {
-  display:inline-block;
+  display: inline-block;
   margin: 0 1em;
 }
 
-.information {
-  padding:1em;
-  width:90%;
+.information, .ticket {
+  padding: 1em;
+  width: 90%;
   margin: 1em auto;
-  display:block;
-  border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
-  }
-  
-#radiator #incompleteStories {
-  font-size: x-small; width:20%;
+  display: block;
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
 }
-#iteration_charts { position:absolute; left:0px; top:10px;}
-  
-.neutral, .total, .started {background: #E4E4E4}
-.good, .valid, .populated, .accepted {background: #86EC96;}
-.bad, .unpopulated, .invalid, .rejected {background: #FF8995;}
-.created {background:#C9DADA;}
-.finished{background:#3C466F; color:white;}
-.delivered{background:#F0A222;}
 
-#ticket_table {margin:1em; display:inline-block; float:right;}
+#radiator #incompleteStories {
+  font-size: x-small;
+  width: 20%;
+}
+#iteration_charts {
+  position: absolute;
+  left: 0px;
+  top: 10px;
+}
+
+.neutral, .total, .started {
+  background: #E4E4E4
+}
+.good, .valid, .populated, .accepted {
+  background: #86EC96;
+}
+.bad, .unpopulated, .invalid, .rejected, .ticket  {
+  background: #FF8995;
+}
+.created {
+  background: #C9DADA;
+}
+.finished {
+  background: #3C466F;
+  color: white;
+}
+.delivered {
+  background: #F0A222;
+}
+
+#ticket_table {
+  margin: 1em;
+  display: inline-block;
+  float: right;
+}
 
 #ticket_table td {
-  height:90px;
+  height: 90px;
   width: 90px;
-  border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
-  }
-  
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+
 #ticket_table td.half {
-  height:45px;
+  height: 45px;
 }
 
 th.rowhead {
-  -webkit-transform:rotate(270deg);
-	-moz-transform:rotate(270deg);
-	-o-transform: rotate(270deg);
+  -webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
 }
 
 #iteration_navigation {
   position: absolute;
   padding: 5px;
-  top:-15px;
-  right:5px;
-  border-radius: 15px; -moz-border-radius: 15px; -webkit-border-radius: 15px;
-  background:#E4E4E4;
-  font-size:small;
+  top: -15px;
+  right: 5px;
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+  background: #E4E4E4;
+  font-size: small;
   z-index: 100;
 }
 
-#iteration_navigation ul{
+#iteration_navigation ul {
   list-style-type: none;
   border-top: 1px solid gray;
-  margin-top:5px;
+  margin-top: 5px;
 }
 
-#iteration_navigation ul li{
+#iteration_navigation ul li {
   list-style-type: none;
   border-top: 1px solid gray;
-  padding:5px;
+  padding: 5px;
 }
 
 #itno {
-  font-size:1.5em;
+  font-size: 1.5em;
 }
 #itdate {
-  
 }
 
 /* Charts: positioning and appearence */
 
 .chart {
-  display:block;
-  float:right;
+  display: block;
+  float: right;
   margin: 0;
   width: 300px;
   height: 300px;
 }
 .chart table, .json {
-  display:none;
+  display: none;
 }
 
 #chart_container_c {
   position: block;
-  float:right;
-  clear:right;
+  float: right;
+  clear: right;
 }
 
 #long_term {
-  width:100%;
-  overflow:auto;
+  width: 100%;
+  overflow: auto;
 }
 
 #chart_all_iterations_time_chart {
   width: 90%;
   margin: 1em auto;
   position: block;
-  float:none;
+  float: none;
+}
+
+/* Story tickets */
+
+.ticket {/* A ticket */
+  width:20%;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+}
+
+.ticket H3 a:visited,.ticket H3 a:link {
+  color: white;
+  text-decoration: none;
+  margin-top: 5px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+.ticket_details {
+  background: white;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  padding: 5px;
+  margin: 0.5em;
+}
+.ticket_details .ticket_created, .ticket_details  .ticket_last_action, .ticket_details .ticket_reject_count, .ticket_started {
+  display:block;
+  clear:both;
+  font-size:small;
+}
+.ticket_details .ticket_state {
+  font-weight:bold;
+}
+
+.ticket .not_rejected {
+  display: none;
+}
+.ticket .ticket_id {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
 }

@@ -11,6 +11,7 @@ end
 
 require 'rubygems'
 require './web'
+require './helpers'
 require 'test/unit'
 require 'rack/test'
 require './test/test_helpers'
@@ -1589,7 +1590,89 @@ class MyUnitTests < Test::Unit::TestCase
   def teardown
     Story.delete_all()
   end
+  
+  def test_iterative_getters()
+    a = Story.create!(
+    :ticket_id=>1, :ticket_type=> 'feature',
+    :created => current_iteration(0),
+    :started => current_iteration(1),
+    :finished => current_iteration(2),
+    :delivered => current_iteration(3),
+    :rejected => current_iteration(4)
+    )
+    b = Story.create!(
+    :ticket_id=>1, :ticket_type=> 'feature',
+    :started => current_iteration(5),
+    )
+    c = Story.create!(
+    :ticket_id=>2, :ticket_type=> 'feature',
+    :created => current_iteration(0),
+    :started => current_iteration(1),
+    :finished => current_iteration(2),
+    :delivered => current_iteration(3)
+    )
+    d = Story.create!(
+    :ticket_id=>2, :ticket_type=> 'feature',
+    :finished => current_iteration(4),
+    :delivered => current_iteration(5)
+    )
+    e = Story.create!(
+    :ticket_id=>3, :ticket_type=> 'feature',
+    :created => current_iteration(0),
+    :started => current_iteration(1),
+    :finished => current_iteration(2),
+    :delivered => current_iteration(3)
+    )
+    f = Story.create!(
+    :ticket_id=>3, :ticket_type=> 'feature',
+    :started => current_iteration(4),
+    :finished => current_iteration(5),
+    :delivered => current_iteration(6)
+    )
+    h = Story.create!(
+    :ticket_id=>3, :ticket_type=> 'feature',
+    :started => current_iteration(7),
+    :finished => current_iteration(8),
+    :deleted => current_iteration(9)
+    )
+    g = Story.create!(
+    :ticket_id=>3, :ticket_type=> 'feature',
+    :finished => current_iteration(10),
+    :delivered => current_iteration(11)
+    )
+    
+    assert_equal(2,a.find_ticket_stack().length)
+    assert_equal(2,b.find_ticket_stack().length)
+    assert_equal(2,c.find_ticket_stack().length)
+    assert_equal(2,d.find_ticket_stack().length)
+    assert_equal(2,a.find_ticket_stack().length)
+    assert_equal(a.find_ticket_stack(),b.find_ticket_stack())
+    assert a.find_ticket_stack().include? a
+    assert a.find_ticket_stack().include? b
+    
+    assert_equal(DateTime.parse(current_iteration(5)),b.started(true))
+    assert_equal(DateTime.parse(current_iteration(5)),b.started(false))
+    assert_equal(DateTime.parse(current_iteration(0)),b.created(true))
+    assert_equal(nil,b.created(false))
+    assert_equal(nil,b.finished(true))
+    assert_equal(nil,b.finished(false))
 
+    assert_equal(DateTime.parse(current_iteration(0)),d.created(true))
+    assert_equal(nil, d.created(false))
+    assert_equal(DateTime.parse(current_iteration(1)),d.started(true))
+    assert_equal(nil,d.started(false))
+    assert_equal(DateTime.parse(current_iteration(4)),d.finished(true))
+    assert_equal(DateTime.parse(current_iteration(4)),d.finished(false))
+    
+    assert_equal(DateTime.parse(current_iteration(0)),g.created(true))
+    assert_equal(nil,g.created(false))
+    assert_equal(DateTime.parse(current_iteration(4)),g.started(true))
+    assert_equal(nil,g.started(false))
+    assert_equal(DateTime.parse(current_iteration(10)),g.finished(true))
+    assert_equal(DateTime.parse(current_iteration(10)),g.finished(false))
+
+  end
+  
 end
 
 class ProblemTickets < Test::Unit::TestCase
@@ -1614,7 +1697,7 @@ class ProblemTickets < Test::Unit::TestCase
       :ticket_id =>4, :created => previous_iteration(1), :started => previous_iteration(2)
     )
     t5 = Story.create!( # Bad, started previous, moving
-      :ticket_id =>5, :created => previous_iteration(1), :started => previous_iteration(2), :finished => current_iteration(0)
+      :name => 'Ticket 5', :ticket_id =>5, :created => previous_iteration(1), :started => previous_iteration(2), :finished => current_iteration(0)
     )
     t6 = Story.create!( # Bad, started more than one iteration previously, stalled
       :ticket_id =>6, :created => very_old_iteration(1), :started => very_old_iteration(2)
@@ -1641,15 +1724,34 @@ class ProblemTickets < Test::Unit::TestCase
       :ticket_id =>9, :started => current_iteration(10)
     )
     t10a = Story.create!( # Bad, rejected multiple times AND stalled Should only count once
-      :ticket_id =>10, :created => previous_iteration(1), :started => previous_iteration(2), :finished => previous_iteration(3),
+      :ticket_id =>10, :name => 'Test', :created => previous_iteration(1), :started => previous_iteration(2), :finished => previous_iteration(3),
       :delivered => previous_iteration(4), :rejected => previous_iteration(5)
     )
     t10b = Story.create!( # ...
-      :ticket_id =>10, :started => previous_iteration(6), :finished => previous_iteration(7),
+      :ticket_id =>10, :name => 'Test', :started => previous_iteration(6), :finished => previous_iteration(7),
       :delivered => previous_iteration(8), :rejected => previous_iteration(9)
     )
     t10c = Story.create!( # ...
-      :ticket_id =>10, :started => previous_iteration(10)
+      :ticket_id =>10, :name => 'Test', :started => previous_iteration(1000)
+    )
+    t11 = Story.create!( # Good, accepted current, created old
+      :ticket_id =>11, :created => previous_iteration(1), :started => previous_iteration(2), :finished => previous_iteration(3),
+      :delivered => previous_iteration(4), :accepted => current_iteration(1)
+    )
+    t12 = Story.create!( # Good, accepted old, created old
+      :ticket_id =>12, :created => previous_iteration(1), :started => previous_iteration(2), :finished => previous_iteration(3),
+      :delivered => previous_iteration(4), :accepted => previous_iteration(5)
+    )
+    t13a = Story.create!( # Good, rejected multiple times, but now accepted
+      :ticket_id =>13, :name => 'Test', :created => previous_iteration(1), :started => previous_iteration(2), :finished => previous_iteration(3),
+      :delivered => previous_iteration(4), :rejected => previous_iteration(5)
+    )
+    t13b = Story.create!( # ...
+      :ticket_id =>13, :name => 'Test', :started => previous_iteration(6), :finished => previous_iteration(7),
+      :delivered => previous_iteration(8), :rejected => previous_iteration(9)
+    )
+    t13c = Story.create!( # ...
+      :ticket_id =>13, :name => 'Test', :started => previous_iteration(1000), :accepted => current_iteration(1)
     )
     problem_tickets = Story.problem_tickets(4)
     assert_equal(6,problem_tickets.length)
@@ -1659,6 +1761,61 @@ class ProblemTickets < Test::Unit::TestCase
     assert problem_tickets.include? t7
     assert problem_tickets.include? t9c
     assert problem_tickets.include? t10c
+    
+    ticket = render_ticket(t10c)
+    expected = <<-TICKET
+    <div class='ticket' id='ticket_10'>
+      <h3 class='ticket_name'><a href="https://www.pivotaltracker.com/story/show/10">Test</a></h3>
+      <div class='ticket_details'><span class='ticket_state'>Started</span>
+      <span class='ticket_id'>10</span>
+      <span class='ticket_created'>Created: 01 February 2012 14:31</span>
+      <span class='ticket_started'>Started: 01 February 2012 14:48</span>
+      <div class='ticket_reject_count been_rejected'><span class='ticket_reject_count_label'>Rejected</span>
+        <span class='ticket_reject_count_counter'>2</span>
+        <span class='ticket_reject_count_label'>times</span>
+      </div></div>
+    </div>
+    TICKET
+    assert ticket == expected, "Expected: #{expected}, Saw: #{ticket}"
+
+    ticket = render_ticket(t5)
+    expected = <<-TICKET
+    <div class='ticket' id='ticket_5'>
+      <h3 class='ticket_name'><a href="https://www.pivotaltracker.com/story/show/5">Ticket 5</a></h3>
+      <div class='ticket_details'><span class='ticket_state'>Finished</span>
+      <span class='ticket_id'>5</span>
+      <span class='ticket_created'>Created: 01 February 2012 14:31</span>
+      <span class='ticket_started'>Started: 01 February 2012 14:31</span>
+      <span class='ticket_last_action'>Finished: 09 February 2012 14:31</span>
+      <div class='ticket_reject_count not_rejected'><span class='ticket_reject_count_label'>Rejected</span>
+        <span class='ticket_reject_count_counter'>0</span>
+        <span class='ticket_reject_count_label'>times</span>
+      </div></div>
+    </div>
+    TICKET
+    
+    assert ticket == expected, "Expected: #{expected}, Saw: #{ticket}"
+  end
+  
+  def test_last_action()
+    assert_equal(DateTime.parse(current_iteration(1)),Story.create!(
+      :ticket_id =>1, :created => current_iteration(1)
+      ).last_action)
+    assert_equal(DateTime.parse(current_iteration(2)),Story.create!(
+      :ticket_id =>2, :created => current_iteration(1), :started => current_iteration(2)
+      ).last_action)
+    assert_equal(DateTime.parse(current_iteration(3)),Story.create!(
+      :ticket_id =>3, :created => current_iteration(1), :started => current_iteration(2), :finished => current_iteration(3)
+      ).last_action)
+    assert_equal(DateTime.parse(current_iteration(4)),Story.create!(
+      :ticket_id =>4, :started => current_iteration(2), :finished => current_iteration(3), :delivered => current_iteration(4)
+      ).last_action)
+    assert_equal(DateTime.parse(current_iteration(4)),Story.create!(
+      :ticket_id =>5, :created => current_iteration(1), :started => current_iteration(2), :accepted => current_iteration(4)
+      ).last_action)
+    assert_equal(DateTime.parse(current_iteration(6)),Story.create!(
+      :ticket_id =>6, :created => current_iteration(1), :started => current_iteration(2), :accepted => current_iteration(5), :rejected => current_iteration(6)
+      ).last_action)
   end
 
   def teardown

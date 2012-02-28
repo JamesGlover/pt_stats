@@ -1,6 +1,10 @@
 
 include Helpers
 
+helpers do
+  include SinatraHelpers
+end
+
 # Display the goods
 get '/' do
   protected!
