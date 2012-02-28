@@ -11,6 +11,9 @@ body {
 H1, H2, H3 {
   margin: 5px;
 }
+#iteration H2 {
+  margin:1em;
+}
 
 .development H1 {
   color: red;
@@ -203,3 +206,8 @@ th.rowhead {
   bottom: 0;
   right: 10px;
 }
+
+#open_drawer {
+  cursor: pointer;
+  }
+  

@@ -217,7 +217,19 @@
       if (local_options.dataOptions.shiftAxis) {local_options.renderOptions.axes.xaxis.ticks.shift();}
       $.jqplot(name + '_chart', data, local_options.renderOptions);
     });
-
+    
+    // Drawer Controls
+    if ($('#open_drawer').length > 0) {
+      $('#navigation').children('li').slideToggle(500);
+      $('#open_drawer').bind('click',function () {
+        $('#navigation').children('li').slideToggle(500);
+        if ($('#open_drawer').text() == '↓') {
+          $('#open_drawer').text('↑')
+        } else {
+          $('#open_drawer').text('↓');
+        }
+      });
+    }
     // End Document Read
   });
 
