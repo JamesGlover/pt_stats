@@ -1,0 +1,21 @@
+<% name = chart[:name].gsub(/\s/,'_') %>
+<div class='chart <%= chart[:type] %>' id='<%= name %>_chart' data-charttype='<%= chart[:type] %>' data-chartname='<%= name %>'>
+  <table id='<%= name %>_data'>
+    <caption id='<%= name %>_title'><%= chart[:title] %></caption>
+    <thead>
+      <tr id='<%= name %>_head'>
+        <th scope='col'>series</th>
+<% chart[:axis].each do |axis| %>
+        <th scope='col' class='axis_label'><%= axis %></th>
+<% end %>
+      </tr>
+    </thead>
+    <tbody id='<%= name %>_body'>
+<% chart[:series].each do |series| %>
+      <tr id='<%= name %>_series_<%= series[0].gsub(/ /,'_') %>'  scope='row'><th><%= series[0] %></th>
+  <% series[1].each do |value| %>
+        <td><%= value %></td>
+  <% end %>
+  </tr>
+<% end %>
+<span id='<%= name %>_json' class='json'>{<%= chart[:properties] %>}</span></tbody></table></div>

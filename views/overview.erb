@@ -25,7 +25,7 @@
       <%= draw_problem_tickets() %>
     </div>
     <div id="message_centre">
-    <%= message_render(messages) if defined? messages %>
+    <%= Message.render_all %>
     </div>
     <!--[if lt IE 9]><script src='./javascript/excanvas.min.js' type="text/javascript" charset="utf-8"></script><![endif]-->
     <script src='./javascript/jqplot/jquery.min.js' type="text/javascript" charset="utf-8"></script>

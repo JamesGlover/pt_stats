@@ -12,6 +12,7 @@ require 'bcrypt'
 require './models'
 require './pt_api'
 require './helpers'
+require './core_ext'
 require './charts'
 
 # Setup globals
@@ -20,10 +21,21 @@ $SETTINGS = YAML::load(File.open('./config.yml'))[@environment]
 $SETTINGS['bucket_code'] = ENV['BUCKET_CODE'] || $SETTINGS['bucket_code']
 $SETTINGS['username'] = ENV['USERNAME'] || $SETTINGS['username']
 $SETTINGS['hash_password'] = ENV['HASH_PASSWORD'] || $SETTINGS['hash_password']
-$SETTINGS['project_id'] = ENV['PROJECT_ID'].to_i if ENV['PROJECT_ID']
+$SETTINGS['project_id'] = ENV['PROJECT_ID'].try(:to_i) || $SETTINGS['project_id']
 $SETTINGS['project_name'] = ENV['PROJECT_NAME'] || $SETTINGS['project_name']
-$SETTINGS['iteration_seed'] = ENV['ITERATION_SEED'] || $SETTINGS['iteration_seed']
-$SETTINGS['iteration_length'] = ENV['ITERATION_LENGTH'].to_i if ENV['ITERATION_LENGTH']
 $SETTINGS['api_token'] = ENV['API_TOKEN'] || $SETTINGS['api_token']
 
+Iteration::SEED = ENV['ITERATION_SEED'].try(:to_time) || $SETTINGS['iteration_seed'].to_time
+Iteration::LENGTH = ENV['ITERATION_LENGTH'].try(:to_i) || $SETTINGS['iteration_length']
+
 require './routes'
+
+if $SETTINGS['proxy']=='auto' && ENV['HTTP_PROXY']!=nil
+ proxy = URI.parse(ENV['HTTP_PROXY'])
+ PtApi::Request::PROXY = Net::HTTP::Proxy(proxy.host,proxy.port)
+elsif $SETTINGS['proxy']
+ proxy = URI.parse($SETTINGS['proxy'])
+ PtApi::Request::PROXY = Net::HTTP::Proxy(proxy.host,proxy.port)
+else
+  PtApi::Request::PROXY =  Net::HTTP
+end

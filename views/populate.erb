@@ -24,7 +24,7 @@
         </div>
         
         <div id="message_holder">
-          <%= message_render(messages) if defined? messages %>
+          <%= Message.render_all %>
         </div>
 
       <div id='populateContainer' class='information <%= database_state %>'><h3>Database Population</h3>

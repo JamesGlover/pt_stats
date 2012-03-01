@@ -1,84 +1,41 @@
 # Ruby charts module for providing chart data
 module Charts
-    
-    def self.chart_states(type,name,title,iterations,location, properties='')
-      series = iterations.map do |i|
-        series_title = (i==0) ? ("Project") : ("Iteration #{i}")
-        series_data = []
-        series_data << Story.created(i).length << Story.started(i).length << Story.finished(i).length << Story.delivered(i).length << Story.accepted(i).length << Story.rejected(i).length 
-        [series_title,series_data]
+  
+    def self.simple(args)#type,name,title,iterations,location, properties='',axis)
+      args[:series] = args[:iterations].map do |i|
+        series_title = (i.all_iterations?) ? ("Project") : ("Iteration #{i.number}")
+        [series_title, self.collect_data(i,args[:axis])]
       end
-      return {
-        :location => location,
-        :type => type,
-        :name => name,
-        :title => title,
-        :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series,
-        :properties => properties
-      }
+      args
     end
-    
-    def self.chart_time_states(type,name,title,iteration,location, properties='')
-      i_start = iteration_start(iteration)
-      series = (0..$SETTINGS['iteration_length']*7-1).map do |i|
+
+    def self.chart_time_states(args)
+      chart_start = args[:iteration].start
+      args[:series] = (0..Iteration::LENGTH*7-1).map do |i|
         series_title = ("Day #{i+1}")
-        series_data = []
-        if i_start+i < DateTime.now
-          series_data << Story.created([i_start,i_start+i+1]).length << Story.started([i_start,i_start+i+1]).length << Story.finished([i_start,i_start+i+1]).length << Story.delivered([i_start,i_start+i+1]).length << Story.accepted([i_start,i_start+i+1]).length << Story.rejected([i_start,i_start+i+1]).length
+        if chart_start+i.days < Time.now
+          series_data = self.collect_data([chart_start, chart_start+(i+1).days],args[:axis])
         else
-          # Do nothing: We don't want to break out, as we still want to build the series.
+          series_data=[]
         end
         [series_title,series_data]
       end
-      return {
-        :location => location,
-        :type => type,
-        :name => name,
-        :title => title,
-        :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series,
-        :properties => properties
-      }
+      args
     end
     
-    def self.chart_iterations_states(type,name,title,iterations,location, properties='') # iterations is a range
-      i_start = iteration_start(iterations.first)
-      series = (iterations).map do |i|
+    def self.chart_iterations_states(args)
+      chart_start = args[:iteration_range].first.iteration.start
+      args[:series] = (args[:iteration_range]).map do |i|
         series_title = ("Iteration #{i}")
-        diff = (i)*$SETTINGS['iteration_length']*7
-        series_data = []
-        series_data << Story.created([i_start,i_start+diff]).length << Story.started([i_start,i_start+diff]).length << Story.finished([i_start,i_start+diff]).length << Story.delivered([i_start,i_start+diff]).length << Story.accepted([i_start,i_start+diff]).length << Story.rejected([i_start,i_start+diff]).length
-        [series_title,series_data]
+        [series_title, self.collect_data([chart_start, i.iteration.end],args[:axis])]
       end
-      return {
-        :location => location,
-        :type => type,
-        :name => name,
-        :title => title,
-        :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected'],
-        :series => series,
-        :properties => properties
-      }
+      args
     end
     
-    def self.chart_types(type,name,title,iterations,location, properties='')
-      series = iterations.map do |i|
-        series_title = (i==0) ? ("Project") : ("Iteration #{i}")
-        series_data = []
-        series_data << Story.bugs(i).length << Story.features(i).length << Story.chores(i).length << Story.releases(i).length
-        [series_title,series_data]
+    def self.collect_data(time,axis)
+      axis.map do |variable|
+        Story.public_send(variable.downcase.to_sym,time).length
       end
-      return {
-        :location => location,
-        :type => type,
-        :name => name,
-        :title => title,
-        :axis => ['Bug','Feature','Chore','Release'],
-        :series => series,
-        :properties => properties
-      }
     end
-    
 end
   

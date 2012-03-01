@@ -1,0 +1,14 @@
+<div class='ticket' id='ticket_<%= ticket.ticket_id %>'>
+  <h3 class='ticket_name'><a href="https://www.pivotaltracker.com/story/show/<%= ticket.ticket_id %>"><%= ticket.name %></a></h3>
+  <div class='ticket_details'><span class='ticket_state'><%= ticket.state.name.titleize %></span>
+  <span class='ticket_id'><%= ticket.ticket_id %></span>
+  <span class='ticket_created'>Created: <%= ticket.ori_created.strftime("%d %B %Y %H:%M") %></span>
+  <span class='ticket_started'>Started: <%= ticket.started(true).strftime("%d %B %Y %H:%M") %></span>
+<% if ticket.state.name != 'started' %>
+  <span class='ticket_last_action'><%= ticket.state.name.titleize %>: <%= ticket.state.date.strftime("%d %B %Y %H:%M") %></span>
+<% end %> 
+    <div class='ticket_reject_count <%= ticket.rejection_count > 0 ? 'been_rejected' : 'not_rejected' %>'><span class='ticket_reject_count_label'>Rejected</span>
+    <span class='ticket_reject_count_counter'><%= ticket.rejection_count %></span>
+    <span class='ticket_reject_count_label'>times</span>
+  </div></div>
+</div>
