@@ -230,6 +230,9 @@
         }
       });
     }
+    
+    // Content Refresh (Meta Content Refresh is not robust)
+    setInterval(function () {window.location.reload();}, 12000);
     // End Document Read
   });
 
