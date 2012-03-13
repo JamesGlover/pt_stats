@@ -188,11 +188,11 @@ th.rowhead {
   -webkit-border-radius: 10px;
   padding: 5px;
   margin: 0.5em;
+  font-size:small;
 }
 .ticket_details .ticket_created, .ticket_details  .ticket_last_action, .ticket_details .ticket_reject_count, .ticket_started {
   display:block;
   clear:both;
-  font-size:small;
 }
 .ticket_details .ticket_state {
   font-weight:bold;
