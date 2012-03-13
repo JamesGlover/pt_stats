@@ -201,24 +201,9 @@
       // And convert it into a chart...
       if (this.local_options.dataOptions.invertSeries) {
         // stacked bars etc.
-        this.local_options.renderOptions.axes.xaxis.ticks = [];
-        for (s = 0; s < this.series.length; s += 1) {
-          // For each series
-          this.local_options.renderOptions.axes.xaxis.ticks[s] = this.series[s][0];
-          this.local_options.renderOptions.series[s] = { label: this.axis[s] };
-        }
-
-        for (i = 0; i < this.axis.length; i += 1) {
-          // For each item
-          data[i] = [];
-          for (s = 0; s < this.series.length; s += 1) {
-            if (this.series[s][1][i] !== undefined) {
-              data[i][s] = (this.series[s][1][i] / this.scale(s) ) * 100;
-            }
-          }
-          if (this.local_options.dataOptions.zeroShift) {data[i].unshift(data[i][0]); }
-        }
-
+        this.iAxisLabels();
+        this.iSeriesLabels();
+        data = this.iData();
       } else {
         // Pie charts etc.
         for (s = 0; s < this.series.length; s += 1) {
@@ -232,6 +217,34 @@
       if (this.local_options.dataOptions.shiftAxis) {this.local_options.renderOptions.axes.xaxis.ticks.shift(); }
       $.jqplot(this.name + '_chart', data, this.local_options.renderOptions);
     };
+    
+    Chart.prototype.iAxisLabels = function () {
+      var s;
+      this.local_options.renderOptions.axes.xaxis.ticks = [];
+      for (s = 0; s < this.series.length; s += 1) {
+        this.local_options.renderOptions.axes.xaxis.ticks[s] = this.series[s][0];
+      }
+    }
+    Chart.prototype.iSeriesLabels = function () {
+      var s;
+      for (s =0; s < this.axis.length; s += 1) {
+        this.local_options.renderOptions.series[s] = { label: this.axis[s] };
+      }
+    }
+    Chart.prototype.iData = function () {
+      var i, data = [];
+      for (i = 0; i < this.axis.length; i += 1) {
+        // For each item
+        data[i] = [];
+        for (s = 0; s < this.series.length; s += 1) {
+          if (this.series[s][1][i] !== undefined) {
+            data[i][s] = (this.series[s][1][i] / this.scale(s) ) * 100;
+          }
+        }
+        if (this.local_options.dataOptions.zeroShift) {data[i].unshift(data[i][0]); }
+      }
+      return data;
+    }
 
     // Automatically parse chart divs, using the contained tabulated data
     $('.chart').each(function () {

@@ -1,10 +1,9 @@
 class Story < ActiveRecord::Base
-
+  
   validates_presence_of :ticket_id
 
-  class << self
-
-    def select_state(state,i)
+  module StoryClassMethods
+        def select_state(state,i)
       states = State.array(false).reverse
       return [] unless states.include? state
       states.slice!(0..states.index(state))
@@ -173,6 +172,7 @@ class Story < ActiveRecord::Base
         return nil
       end
     end
+    private :types
 
     def bugs(i)
       types(i,'bug')
@@ -225,182 +225,197 @@ class Story < ActiveRecord::Base
           AND accepted IS NULL;")
     end
   end
-  
-  # Methods
 
-  def clone(args={})
-    Story.create!( { :ticket_id=>self.ticket_id, :name=>self.name,:ticket_type=>self.ticket_type }.merge(args) )
-  end
+  module StoryInstanceMethods
+    def clone(args={})
+      Story.create!( { :ticket_id=>self.ticket_id, :name=>self.name,:ticket_type=>self.ticket_type }.merge(args) )
+    end
 
-  def state
-    State.array.each do |s|
-      if sd = self.send(s)
-        return State.new(s, sd)
+    def state
+      State.array.each do |s|
+        if sd = self.send(s)
+          return State.new(s, sd)
+        end
+      end
+      nil
+    end
+
+    def target_ticket(new_state)
+      return nil if new_state.no_change?(self.state, self)
+      return self.clone if new_ticket_required?(new_state)
+      self
+    end
+
+    def new_ticket_required?(new_state) 
+      State.array.each do |state|
+        if (self[state.to_sym] !=nil && self[state.to_sym] < new_state.date )
+          return true
+        elsif ( state == new_state.name )
+          return false
+        end
       end
     end
-    nil
-  end
 
-  def target_ticket(new_state)
-    return nil if new_state.no_change?(self.state, self)
-    return self.clone if new_ticket_required?(new_state)
-    self
-  end
+    def update_state(requested_state,date)
+      new_state = State.new(requested_state,date)
+      if target = target_ticket(new_state)
+        target[new_state.name.to_sym] = new_state.date
+        target.save
+      end
+      target
+    end
 
-  # TODO: Can be improved
-  def new_ticket_required?(new_state)
-    if (new_state.exists_on?(self))&&(self[new_state.name.to_sym] < new_state.date)
-      return true
-    end    
-    State.array.each do |state|
-      if ( state == new_state.name )
-        return false
-      elsif (self[state.to_sym] !=nil && self[state.to_sym] < new_state.date )
-        return true
+    def reject(date)
+      self.update_state('rejected',date)
+    end
+
+    def rejection_count
+      Story.where("ticket_id = ? AND rejected IS NOT NULL AND deleted IS NULL",self.ticket_id).length
+    end
+  
+    def find_ticket_stack
+      Story.find_all_by_ticket_id_and_deleted(self.ticket_id,nil, :order=> 'id DESC')
+    end
+  
+    def entered_state(attribute,iterate=fasle)
+      if iterate
+        return read_attribute(attribute) unless read_attribute(attribute).nil?
+        return nil if (State.array.index(attribute)<=self.state.index)
+        stack = find_ticket_stack
+        return nil if stack.empty?
+        (stack.index(self)..stack.length-1).each do |i|
+          return stack[i].read_attribute(attribute) unless stack[i].read_attribute(attribute).nil?
+        end
+        return 'Unknown'
+      else
+        read_attribute(attribute)
       end
     end
-  end
-
-  def update_state(requested_state,date)
-    new_state = State.new(requested_state,date)
-    if target = target_ticket(new_state)
-      target[new_state.name.to_sym] = new_state.date
-      target.save
+    private :entered_state
+  
+    def created(iterate=false)
+      entered_state("created",iterate)
     end
-    target
-  end
+    def started(iterate=false)
+      entered_state("started",iterate)
+    end
+    def finished(iterate=false)
+      entered_state("finished",iterate)
+    end
+    def delivered(iterate=false)
+      entered_state("delivered",iterate)
+    end
+    def accepted(iterate=false)
+      entered_state("accepted",iterate)
+    end
+    def rejected(iterate=false)
+      entered_state("rejected",iterate)
+    end
 
-  def reject(date)
-    self.update_state('rejected',date)
-  end
+    def ori_created
+      Story.where('ticket_id=?',ticket_id).order('id ASC').first.created
+    end
 
-  def rejection_count
-    Story.where("ticket_id = ? AND rejected IS NOT NULL AND deleted IS NULL",self.ticket_id).length
-  end
-  
-  def find_ticket_stack
-    Story.find_all_by_ticket_id_and_deleted(self.ticket_id,nil, :order=> 'id DESC')
-  end
-  
-  def custom_getter(attribute,iterate)
-    if iterate
-      return read_attribute(attribute) if read_attribute(attribute) != nil
-      return nil if (State.array.index(attribute)<=self.state.index)
-      stack = find_ticket_stack
-      return nil if stack.empty?
-      (stack.index(self)..stack.length-1).each do |i|
-        return stack[i].read_attribute(attribute) if stack[i].read_attribute(attribute) != nil
+    def ori_created=(date)
+      target = Story.where('ticket_id=?',ticket_id).order('id ASC').first
+      if target.nil? || target == self
+        self.created = date
+      else # We only want to save if we've altered an unexpected record. Otherwise, leave it to the main function.
+        target.created = date
+        target.save
       end
-      return 'Unknown'
-    else
-      read_attribute(attribute)
     end
-  end
-  private :custom_getter
+
+    def delete(date)
+      date = date.to_time
+      Story.find_all_by_ticket_id(self.ticket_id).each do |s|
+        s.deleted= date
+        s.save
+      end
+    end
   
-  def created(iterate=false)
-    custom_getter("created",iterate)
-  end
-  def started(iterate=false)
-    custom_getter("started",iterate)
-  end
-  def finished(iterate=false)
-    custom_getter("finished",iterate)
-  end
-  def delivered(iterate=false)
-    custom_getter("delivered",iterate)
-  end
-  def accepted(iterate=false)
-    custom_getter("accepted",iterate)
-  end
-  def rejected(iterate=false)
-    custom_getter("rejected",iterate)
-  end
-
-  def ori_created
-    Story.where('ticket_id=?',ticket_id).order('id ASC').first.created
-  end
-
-  def ori_created=(date)
-    target = Story.where('ticket_id=?',ticket_id).order('id ASC').first
-    if target.nil? || target == self
-      self.created = date
-    else # We only want to save if we've altered an unexpected record. Otherwise, leave it to the main function.
-      target.created = date
-      target.save
+    def last_action # Returns Time of latest state change
+      State.array.each do |state|
+        return self[state] if self[state] != nil
+      end
     end
-  end
-
-  def delete(date)
-    date = date.to_time
-    Story.find_all_by_ticket_id(self.ticket_id).each do |s|
-      s.deleted= date
-      s.save
+  
+    def update_details(story)
+      self.name = story.name || self.name || "Unknown story"
+      self.ticket_type = story.ticket_type || self.ticket_type || 'unknown'
+      self.save
     end
   end
   
-  def last_action # Returns Time of latest state change
-    State.array.each do |state|
-      return self[state] if self[state] != nil
-    end
+  class << self
+    include StoryClassMethods
   end
   
-  def update_details(story)
-    self.name = story.name || self.name || "Unknown story"
-    self.ticket_type = story.ticket_type || self.ticket_type || 'unknown'
-    self.save
-  end
+  include StoryInstanceMethods
+
+  
   
   class State
-    attr_reader :date, :name, :index
-
-    def self.array(deleted=true)
-      if deleted
-        ['deleted','rejected','accepted','delivered','finished','started','created']
-      else
-        ['rejected','accepted','delivered','finished','started','created']
+    
+    module StateClassMethods
+      def array(deleted=true)
+        if deleted
+          ['deleted','rejected','accepted','delivered','finished','started','created']
+        else
+          ['rejected','accepted','delivered','finished','started','created']
+        end
       end
     end
+    
+    module StateInstanceMethods
+      attr_reader :date, :name
 
-    def initialize(name,date)
-      name = 'created' if ['unstarted','unscheduled'].include?(name)
-      @name = name
-      @date = date.to_time
-      @valid = validate_state
+      def initialize(name,date)
+        name = 'created' if ['unstarted','unscheduled'].include?(name)
+        @name = name
+        @date = date.to_time
+        @valid = validate_state
+      end
+    
+      def validate_state
+        State.array.include?(@name)
+      end
+      private :validate_state
+    
+      def valid?
+        @valid
+      end
+    
+      def invalid?
+        !@valid
+      end
+
+      def index
+        @index ||= State.array.index(@name)
+      end
+    
+      def changed_since?(previous)
+        @name == previous.try(:name)
+      end
+    
+      def exists_on?(ticket)
+        !ticket[@name.to_sym].nil?
+      end
+    
+      def ==(b)
+        @name == b.name && @date == b.date
+      end
+    
+      def no_change?(old_state,ticket)
+        invalid? || changed_since?(old_state) || ( exists_on?(ticket) && (ticket[@name.to_sym] >= @date))
+      end
     end
     
-    def validate_state
-      State.array.include?(@name)
-    end
-    private :validate_state
-    
-    def valid?
-      @valid
-    end
-    
-    def invalid?
-      !@valid
+    class << self
+      include StateClassMethods
     end
 
-    def index
-      @index ||= State.array.index(@name)
-    end
-    
-    def changed_since?(previous)
-      @name == previous.try(:name)
-    end
-    
-    def exists_on?(ticket)
-      !ticket[@name.to_sym].nil?
-    end
-    
-    def ==(b)
-      @name == b.name && @date == b.date
-    end
-    
-    def no_change?(old_state,ticket)
-      invalid? || changed_since?(old_state) || ( exists_on?(ticket) && (ticket[@name.to_sym] >= @date))
-    end
+    include StateInstanceMethods
     
   end
   

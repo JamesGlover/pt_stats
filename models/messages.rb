@@ -1,7 +1,8 @@
 class Message
-  @@messages = []
-  
-  class << self
+
+  module MessageClassMethods
+    
+    @@messages = []
     
     def count
       @@messages.length
@@ -24,19 +25,26 @@ class Message
       end
       message_string
     end
-  
   end
   
-  def initialize(atts,silent=false)
+  module MessageInstanceMethods
+    def initialize(atts,silent=false)
       @idn = atts[:id] || "message_#{Message.count}"
       @classes = atts[:classes] || 'neutral'
       @title = atts[:title] || 'Message'
       @body = atts[:body] || ''
       Message.add(self) unless silent
+    end
+  
+    def render()
+      "<div id='#{@idn}' class='message information #{@classes}'> <h3>#{@title}</h3> <p>#{@body}</p></div>"
+    end
   end
   
-  def render()
-    "<div id='#{@idn}' class='message information #{@classes}'> <h3>#{@title}</h3> <p>#{@body}</p></div>"
+  class << self
+    include MessageClassMethods
   end
+  
+  include MessageInstanceMethods
   
 end

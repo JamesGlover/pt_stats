@@ -1,13 +1,14 @@
 class Iteration
 
   module IterationNumber
+    # Included in Fixnum
     def iteration
       Iteration.new(self)
     end
   end
   
   module IterationDate
-    
+    # Included in Date
     def iteration_number
       ((self - Iteration::SEED).seconds/(1.iterations)).to_i + 1
     end
@@ -20,13 +21,13 @@ class Iteration
   end
   
   module IterationDuration
+    # Included in Numeric, compatible with ActiveSupport::Duration
     def iterations
       ActiveSupport::Duration.new(self * Iteration::LENGTH.weeks, [[:days, self * 7 * Iteration::LENGTH]])
     end
   end
-
-  class << self  
-    # Class methods/variables
+  
+  module IterationClassMethods
     def current
       Time.now.iteration
     end
@@ -34,50 +35,60 @@ class Iteration
     def all
       IterationAll.instance
     end
+  end
+  
+  module IterationInstanceMethods
+    attr_reader :number
 
+    def initialize(number)
+      @number = number
+    end
+
+    def start
+      @start ||= (@number - 1).iterations.since(Iteration::SEED)
+    end
+
+    def end
+      @end ||= 1.iterations.since(self.start)
+    end
+
+    def all_iterations?
+      false
+    end
+  end
+  
+  class << self  
+    include IterationClassMethods
   end
 
-  # Instance methods/variables
-  attr_reader :number
-  
-  def initialize(number)
-    @number = number
-  end
-  
-  def start
-    @start ||= (@number - 1).iterations.since(Iteration::SEED)
-  end
-  
-  def end
-    @end ||= 1.iterations.since(self.start)
-  end
-  
-  def all_iterations?
-    false
-  end
+  include IterationInstanceMethods
 
 end
 
 class IterationAll < Iteration
   include Singleton
   
-  def initialize
+  module IterationAllMethods
+    def initialize
+    end
+  
+    def start
+      Iteration::SEED
+    end
+  
+    def end
+      Time.now
+    end
+  
+    def number
+      nil
+    end
+  
+    def all_iterations?
+      true
+    end
   end
   
-  def start
-    Iteration::SEED
-  end
-  
-  def end
-    Time.now
-  end
-  
-  def number
-    nil
-  end
-  
-  def all_iterations?
-    true
-  end
+  include IterationAllMethods
 
 end

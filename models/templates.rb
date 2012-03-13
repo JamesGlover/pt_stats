@@ -1,12 +1,16 @@
 class Template
-  def initialize(template)
-    @template = "./views/elements/#{template}.erb"
+  module TemplateMethods
+    def initialize(template)
+      @template = "./views/elements/#{template}.erb"
+    end
+  
+    def fill(source_binding)
+      File.open(@template) do |file|
+        ERB.new(file.read)
+      end.result(source_binding)
+    end
   end
   
-  def fill(source_binding)
-    File.open(@template) do |file|
-      ERB.new(file.read)
-    end.result(source_binding)
-  end
+  include TemplateMethods
 
 end
