@@ -1,7 +1,7 @@
 # Ruby charts module for providing chart data
 module Charts
   
-    def self.simple(args)#type,name,title,iterations,location, properties='',axis)
+    def self.simple(args)
       args[:series] = args[:iterations].map do |i|
         series_title = (i.all_iterations?) ? ("Project") : ("Iteration #{i.number}")
         [series_title, self.collect_data(i,args[:axis])]
@@ -38,4 +38,3 @@ module Charts
       end
     end
 end
-  

@@ -1,42 +1,64 @@
 class Story < ActiveRecord::Base
   
   validates_presence_of :ticket_id
-
-  module StoryClassMethods
-        def select_state(state,i)
+  module StoryClassStateSelectors
+    def select_state(state,i)
       states = State.array(false).reverse
       return [] unless states.include? state
       states.slice!(0..states.index(state))
-      if (i.is_a? Iteration) && (i.all_iterations?)
+      bound = ['created','accepted'].include?(state) ? "AND x.#{state} >= '#{i.start}'" : ""
+      postevents = states.empty? ? "" : "AND (COALESCE(#{states.join(', ')}) >= '#{i.end}') IS NOT FALSE"
+      self.find_by_sql("
+        SELECT * FROM (
+          SELECT DISTINCT ON (ticket_id) * FROM stories
+          WHERE deleted IS NULL
+          AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{i.end}')
+          ORDER BY ticket_id, id DESC )
+        AS x 
+        WHERE (x.#{state} < '#{i.end}'
+        #{bound})
+        #{postevents}
+        ORDER BY ticket_id, id DESC")
+    end
+
+
+    def total(i)
+      if (i.try(:all_iterations?))
         self.find_by_sql("
-          SELECT * 
-          FROM (
-            SELECT DISTINCT ON (ticket_id) * FROM stories
-            WHERE deleted IS NULL
-            ORDER BY ticket_id, id DESC )
-          AS x 
-          WHERE x.#{state} IS NOT NULL
-          AND (COALESCE(#{states.join(', ')}) IS NULL)
+          SELECT DISTINCT ON (ticket_id) * FROM stories
+          WHERE deleted IS NULL
           ORDER BY ticket_id, id DESC")
       else
-        start = i.start
-        finish = i.end
-        bound = ['created','accepted'].include?(state) ? ">= '#{start}'" : "IS NOT NULL"
         self.find_by_sql("
-          SELECT *
-          FROM (
-            SELECT DISTINCT ON (ticket_id) * FROM stories
+          SELECT * FROM (
+            SELECT DISTINCT ON (ticket_id) * FROM stories 
             WHERE deleted IS NULL
-            AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}')
+            AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{i.end}')
             ORDER BY ticket_id, id DESC )
           AS x 
-          WHERE (x.#{state} < '#{finish}'
-          AND x.#{state} #{bound})
-          AND (COALESCE(#{states.join(', ')}) >= '#{finish}') IS NOT FALSE
-          ORDER BY ticket_id, id DESC")
+          WHERE (
+            x.accepted >= '#{i.start}'
+            OR x.accepted IS NULL)
+          AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{i.end}'
+          ORDER BY ticket_id, id DESC;")
       end
     end
 
+    def deleted(i)
+      if (i.try(:all_iterations?))
+        self.where("deleted IS NOT NULL")
+      else
+        self.find_by_sql("
+          SELECT * FROM (
+            SELECT DISTINCT ON (ticket_id) * FROM stories
+            WHERE (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{i.end}')
+            ORDER BY ticket_id ASC, id DESC )
+          AS x
+          WHERE x.deleted >= '#{i.start}'
+          AND x.deleted <'#{i.end}'")
+      end
+    end
+    
     def created(i)
       select_state('created',i)
     end
@@ -58,103 +80,28 @@ class Story < ActiveRecord::Base
     end
 
     def rejected(i)
-      if (i.is_a? Iteration) && (i.all_iterations?)
-        self.find_by_sql("
-          SELECT * 
-          FROM (
-            SELECT DISTINCT ON (ticket_id) *
-            FROM stories
-            WHERE deleted IS NULL 
-            ORDER BY ticket_id, id DESC )
-          AS x WHERE x.rejected IS NOT NULL")
-      else
-        start = i.start
-        finish = i.end
-        self.find_by_sql("
-          SELECT * 
-          FROM (
-            SELECT DISTINCT ON (ticket_id) *
-            FROM stories
-            WHERE deleted IS NULL
-            AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}')
-            ORDER BY ticket_id ASC, id DESC )
-          AS x
-          WHERE x.rejected <'#{finish}'")
-      end
-
+      select_state('rejected',i)
     end
-
-    def total(i)
-      if (i.is_a? Iteration) && (i.all_iterations?)
-        self.find_by_sql("
-          SELECT DISTINCT ON (ticket_id) *
-          FROM stories
-          WHERE deleted IS NULL
-          ORDER BY ticket_id, id DESC")
-      else
-        start = i.start
-        finish = i.end
-        self.find_by_sql("
-          SELECT *
-          FROM (
-            SELECT DISTINCT ON (ticket_id) *
-            FROM stories 
-            WHERE deleted IS NULL
-            AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}')
-            ORDER BY ticket_id, id DESC )
-          AS x 
-          WHERE (
-            x.accepted >= '#{start}'
-            OR x.accepted IS NULL)
-          AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{finish}'
-          ORDER BY ticket_id, id DESC;")
-      end
-    end
-
-    def deleted(i)
-      if (i.is_a? Iteration) && (i.all_iterations?)
-        self.where("deleted IS NOT NULL")
-
-      else
-        start = i.start
-        finish = i.end
-        self.find_by_sql("
-          SELECT *
-          FROM (
-            SELECT DISTINCT ON (ticket_id) *
-            FROM stories
-            WHERE (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}')
-            ORDER BY ticket_id ASC, id DESC )
-          AS x
-          WHERE x.deleted >= '#{start}'
-          AND x.deleted <'#{finish}'")
-      end
-    end
-
-    def incomplete
-      incomplete = self.where("name = :name OR ticket_type = :type AND deleted IS NULL",
-      {:name => 'Unknown story', :type => 'unknown'})
-      incomplete.map(&:ticket_id)
-    end
-
+    
+  end
+  
+  module StoryClassTypeSelectors
     def types(i,type)
       if ['bug','feature','chore','release'].include?(type)
         if !i.all_iterations?
-          start = i.start
-          finish = i.end
           self.find_by_sql("
             SELECT *
             FROM (
               SELECT DISTINCT ON (ticket_id) *
               FROM stories
               WHERE deleted IS NULL
-              AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{finish}')
+              AND (COALESCE(created, started, finished, delivered, accepted, rejected) < '#{i.end}')
               ORDER BY ticket_id, id DESC )
             AS x 
             WHERE (
-              x.accepted >= '#{start}' 
+              x.accepted >= '#{i.start}' 
               OR x.accepted IS NULL)
-            AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{finish}'
+            AND COALESCE(started, finished, delivered, accepted, rejected ) < '#{i.end}'
             AND (x.ticket_type = '#{type}')
             ORDER BY ticket_id, id DESC;")
         else
@@ -188,6 +135,15 @@ class Story < ActiveRecord::Base
   
     def releases(i)
       types(i,'release')
+    end
+  end
+  
+  module StoryClassMethods
+
+    def incomplete
+      incomplete = self.where("name = :name OR ticket_type = :type AND deleted IS NULL",
+      {:name => 'Unknown story', :type => 'unknown'})
+      incomplete.map(&:ticket_id)
     end
   
     def problem_tickets(i=Iteration.current)
@@ -349,12 +305,12 @@ class Story < ActiveRecord::Base
   
   class << self
     include StoryClassMethods
+    include StoryClassStateSelectors
+    include StoryClassTypeSelectors
   end
-  
+
   include StoryInstanceMethods
 
-  
-  
   class State
     
     module StateClassMethods

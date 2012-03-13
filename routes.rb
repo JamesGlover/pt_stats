@@ -24,7 +24,6 @@ get '/' do
     :location => 'c',
     :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
   )
-  messages = []
   if Story.count() == 0
     Message.new({
       :id => 'databaseUnpopulated',
@@ -62,7 +61,6 @@ get '/' do
       :iteration_delivered => Story.delivered(i).length,
       :iteration_accepted => Story.accepted(i).length,
       :iteration_total => Story.total(i).length,
-      :messages => messages,
       :charts => charts
     }
   rescue PGError
@@ -78,7 +76,7 @@ get '/' do
       :project_total => 0, :iteration=>i, :iteration_end=> i.iteration.end,
       :iteration_created => 0, :iteration_rejected => 0, :iteration_started => 0,
       :iteration_finished => 0, :iteration_delivered => 0, :iteration_accepted => 0,
-      :iteration_total => 0, :messages => messages, :charts => charts
+      :iteration_total => 0, :charts => charts
     }
   end
 end
@@ -97,13 +95,11 @@ get '/overview' do
     :properties => '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}',
     :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
   )
-  messages = []
 
   begin
     erb :overview, :locals => {
       :iteration=>i.number,
       :iteration_end=> i.end,
-      :messages => messages,
       :charts => charts
     }
   rescue PGError
@@ -114,20 +110,19 @@ get '/overview' do
       :body => "There were problems querying the database"
     })
     erb :index, :locals => {
-      :iteration=>i, :messages => messages, :charts => charts
+      :iteration=>i, :charts => charts
     }
   end
 end
 
 get '/populate' do
   protected!
-  pop_interface([],$SETTINGS['api_token']);
+  pop_interface($SETTINGS['api_token']);
 end
 
 post '/populate' do
   protected!
-  messages=[]
-  if params[:api_key] == ''
+  if params[:api_key].blank?
     Message.new({
       :id => "no_api_key",
       :classes => 'bad',
@@ -152,8 +147,7 @@ post '/populate' do
       If you were not using the web interface to update the database, please ensure your request is valid."
     })
   end
-
-  pop_interface(messages, params[:api_key]);
+  pop_interface(params[:api_key]);
 end
 
 

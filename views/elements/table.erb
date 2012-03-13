@@ -12,10 +12,10 @@
     </thead>
     <tbody id='<%= name %>_body'>
 <% chart[:series].each do |series| %>
-      <tr id='<%= name %>_series_<%= series[0].gsub(/ /,'_') %>'  scope='row'><th><%= series[0] %></th>
+      <tr id='<%= name %>_series_<%= series[0].gsub(/ /,'_') %>'><th scope='row'><%= series[0] %></th>
   <% series[1].each do |value| %>
         <td><%= value %></td>
   <% end %>
   </tr>
 <% end %>
-<span id='<%= name %>_json' class='json'>{<%= chart[:properties] %>}</span></tbody></table></div>
+</tbody></table><span id='<%= name %>_json' class='json'>{<%= chart[:properties] %>}</span></div>

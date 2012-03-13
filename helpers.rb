@@ -36,7 +36,7 @@ module SinatraHelpers
     stories_string << '</ul>'
   end
 
-  def pop_interface(messages,api)
+  def pop_interface(api)
     database_count = Story.count
     database_state = database_count >0 ? 'populated' : 'unpopulated'
 
@@ -49,7 +49,6 @@ module SinatraHelpers
       :project_total => database_count,
       :invalid_stories => invalid_state,
       :invalid_stories_list => invalid_list,
-      :messages => messages,
       :api_token => api,
       :iteration=>i.number,
       :iteration_end=> i.end

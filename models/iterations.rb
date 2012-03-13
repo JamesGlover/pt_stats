@@ -73,11 +73,13 @@ class IterationAll < Iteration
     end
   
     def start
-      Iteration::SEED
+      # Use infinity, rather than the seed, as otherwise any tickets out of bounds would not be counted.
+      # While unlikely, out of bounds tickets may result from bugs, or from changes to the database seed.
+      '-infinity'
     end
   
     def end
-      Time.now
+      'infinity'
     end
   
     def number
