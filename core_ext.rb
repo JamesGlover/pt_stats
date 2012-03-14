@@ -32,4 +32,12 @@ class Array
     self.last.to_time
   end
   
+  def to_ul(cls)
+    ul = "<ul class='#{cls}'>"
+    self.each do |item|
+      ul << "<li>#{item}</li>"
+    end
+    ul << '</ul>'
+  end
+  
 end

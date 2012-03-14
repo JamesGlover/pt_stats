@@ -16,10 +16,10 @@
       </ul>
         <!--<li>Detailed stats</li>--></div>
     <div id="long_term">
-      <%= chart_render(charts,'a') %>
+      <%= Chart.render_all_in('ov_a') %>
     </div>
     <!--<div id="tandc_container">-->
-    <div id="chart_container_b" class="chart_container"><%= chart_render(charts,'b') %></div>
+    <div id="chart_container_b" class="chart_container"><%= Chart.render_all_in('ov_b') %></div>
     <div id="problem_tickets">
       <h2>Problem Tickets</h2>
       <%= draw_problem_tickets() %>

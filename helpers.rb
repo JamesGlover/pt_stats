@@ -19,23 +19,6 @@ module SinatraHelpers
     end
   end
 
-  def chart_render(charts,location)
-    template = Template.new('table')
-    chart_string =""
-    charts.map do |chart|
-      next if chart[:location] != location
-      template.fill(binding)
-    end.join('')
-  end
-
-  def idlist_render(stories)
-    stories_string = "<ul class='invalid_list'>"
-    stories.each do |story|
-      stories_string << "<li>#{story}</li>"
-    end
-    stories_string << '</ul>'
-  end
-
   def pop_interface(api)
     database_count = Story.count
     database_state = database_count >0 ? 'populated' : 'unpopulated'
@@ -58,13 +41,9 @@ module SinatraHelpers
   def draw_problem_tickets()
     tickets = ""
     Story.problem_tickets().each do |ticket|
-      tickets << render_ticket(ticket)
+      tickets << ticket.render
     end
     tickets
-  end 
-
-  def render_ticket(ticket)
-    Template.new('ticket').fill(binding)
   end
 
 end

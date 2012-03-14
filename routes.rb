@@ -7,23 +7,7 @@ end
 get '/' do
   protected!
   i=Iteration.current
-  charts = []
-  charts << Charts.chart_time_states(
-    :type => 'stacked-area',
-    :name => 'chart_iterations_time',
-    :title => 'Iteration Ticket States',
-    :iteration => i,
-    :location => 'c',
-    :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
-    )
-  charts << Charts.simple(
-    :type => 'stacked-bar',
-    :name => 'chart_iterations2',
-    :title => 'Project Ticket States',
-    :iterations => [Iteration.all],
-    :location => 'c',
-    :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
-  )
+  Chart.update_in('c')
   if Story.count() == 0
     Message.new({
       :id => 'databaseUnpopulated',
@@ -60,8 +44,7 @@ get '/' do
       :iteration_finished => Story.finished(i).length,
       :iteration_delivered => Story.delivered(i).length,
       :iteration_accepted => Story.accepted(i).length,
-      :iteration_total => Story.total(i).length,
-      :charts => charts
+      :iteration_total => Story.total(i).length
     }
   rescue PGError
     Message.new({
@@ -76,7 +59,7 @@ get '/' do
       :project_total => 0, :iteration=>i, :iteration_end=> i.iteration.end,
       :iteration_created => 0, :iteration_rejected => 0, :iteration_started => 0,
       :iteration_finished => 0, :iteration_delivered => 0, :iteration_accepted => 0,
-      :iteration_total => 0, :charts => charts
+      :iteration_total => 0
     }
   end
 end
@@ -85,22 +68,12 @@ end
 get '/overview' do
   protected!
   i=Iteration.current
-  charts = []
-  charts << Charts.chart_iterations_states(
-    :type => 'stacked-area',
-    :name => 'chart_all_iterations_time',
-    :title => 'Ticket States History',
-    :iteration_range => (0..i.number),
-    :location => 'a',
-    :properties => '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}',
-    :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
-  )
-
+  Chart.named('chart_all_iterations_time').iteration_range = (0..Iteration.latest.number)
+  Chart.update_in('ov_a')
   begin
     erb :overview, :locals => {
       :iteration=>i.number,
       :iteration_end=> i.end,
-      :charts => charts
     }
   rescue PGError
     Message.new({
@@ -110,7 +83,7 @@ get '/overview' do
       :body => "There were problems querying the database"
     })
     erb :index, :locals => {
-      :iteration=>i, :charts => charts
+      :iteration=>i,
     }
   end
 end
@@ -136,7 +109,7 @@ post '/populate' do
   elsif params[:submit] == 'Flag All Deleted Stories'
     req = PtApi::FlagDeleted.new($SETTINGS['project_id'],params[:api_key],'all').do
   elsif params[:submit] == 'Flag Listed Deleted Stories'
-    req = PtApi::FlagDeleted.new($SETTINGS['project_id'],params[:api_key],params[:del_ids].split(',')).do
+    req = PtApi::FlagDeleted.new($SETTINGS['project_id'],params[:api_key],params[:del_ids].gsub(/\s+/,'').gsub(/\*/,',').split(',')).do
   else
     Message.new({
       :id => "invalid_post",

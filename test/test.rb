@@ -1862,6 +1862,13 @@ class MyUnitTests < Test::Unit::TestCase
     
   end
   
+  def test_deleted_tickets_are_not_flagged_for_repair
+    Story.create!(:ticket_id=> 6, :name=> "Unknown story", :deleted=> "2012-03-13 15:42:00", :ticket_type=> "unknown")
+    Story.create!(:ticket_id=> 7, :name=> "Unknown story", :deleted=> "2012-03-13 15:42:00", :ticket_type=> "unknown")
+    Story.create!(:ticket_id=> 8, :name=> "Unknown story", :deleted=> "2012-03-13 15:42:00", :ticket_type=> "unknown")
+    assert_equal([],Story.incomplete)
+  end
+  
 end
 
 class ProblemTickets < Test::Unit::TestCase
@@ -1950,8 +1957,7 @@ class ProblemTickets < Test::Unit::TestCase
     assert problem_tickets.include? t7
     assert problem_tickets.include? t9c
     assert problem_tickets.include? t10c
-    
-    ticket = render_ticket(t10c)
+    ticket = t10c.render
     expected = <<-TICKET
 <div class='ticket' id='ticket_10'>
   <h3 class='ticket_name'><a href="https://www.pivotaltracker.com/story/show/10">Test</a></h3>
@@ -1968,7 +1974,7 @@ TICKET
     assert ticket.gsub(/\s+/, ' ') == expected.gsub(/\s+/,' '), "Exp: #{expected.gsub(/\s+/, ' ')},
 Saw: #{ticket.gsub(/\s+/, ' ')}"
 
-    ticket = render_ticket(t5)
+    ticket = t5.render
     expected = <<-TICKET
 <div class='ticket' id='ticket_5'>
   <h3 class='ticket_name'><a href="https://www.pivotaltracker.com/story/show/5">Ticket 5</a></h3>

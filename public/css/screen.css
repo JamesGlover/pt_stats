@@ -28,12 +28,17 @@ input {
   -webkit-border-radius: 5px;
   border: 0;
   padding: 0.5em;
+  margin:0.5em;
   font-size: large;
 }
 label {
   clear: both;
   display: block;
   padding: 1em 0 0.5em 0;
+}
+.group {
+  display:block;
+  clear: both;
 }
 .tile {
   display: inline-block;
@@ -211,3 +216,16 @@ th.rowhead {
   cursor: pointer;
   }
   
+/* Ticket id lists */
+.ticket_list li {
+  display: inline;
+  list-style-type: none;
+}
+
+.ticket_list li:after {
+  content: ", ";
+}
+
+.ticket_list li:last-child:after {
+  content: ""
+}

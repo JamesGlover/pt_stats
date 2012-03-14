@@ -141,7 +141,7 @@ class Story < ActiveRecord::Base
   module StoryClassMethods
 
     def incomplete
-      incomplete = self.where("name = :name OR ticket_type = :type AND deleted IS NULL",
+      incomplete = self.where("( name = :name OR ticket_type = :type ) AND deleted IS NULL",
       {:name => 'Unknown story', :type => 'unknown'})
       incomplete.map(&:ticket_id)
     end
@@ -301,6 +301,11 @@ class Story < ActiveRecord::Base
       self.ticket_type = story.ticket_type || self.ticket_type || 'unknown'
       self.save
     end
+    
+    def render
+      Template.new('ticket').fill(binding)
+    end
+    
   end
   
   class << self

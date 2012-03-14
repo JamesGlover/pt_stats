@@ -32,6 +32,13 @@ class Iteration
       Time.now.iteration
     end
     
+    def latest
+      # While Iteration.current returns an instance representing
+      # the current iteration, Iteration.latest will ALWAYS
+      # represent the most recent iteration, even if it changes
+      IterationLatest.instance
+    end
+    
     def all
       IterationAll.instance
     end
@@ -92,5 +99,30 @@ class IterationAll < Iteration
   end
   
   include IterationAllMethods
+
+end
+
+class IterationLatest < Iteration
+  include Singleton
+  
+  module IterationLatestMethods
+    def initialize
+    end
+  
+    def start
+      Iteration.current.start
+    end
+  
+    def end
+      Iteration.current.end
+    end
+  
+    def number
+      Iteration.current.number
+    end
+    
+  end
+  
+  include IterationLatestMethods
 
 end

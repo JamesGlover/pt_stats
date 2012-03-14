@@ -17,7 +17,7 @@
       <span id="open_drawer">&darr;</span>
         <!--<li>Detailed stats</li>--></div>
     <div id="iteration_charts">
-      <%= chart_render(charts,'a') %>
+      <%= Chart.render_all_in('a') %>
     </div>
     <!--<div id="tandc_container">-->
     <table id="ticket_table">
@@ -55,8 +55,8 @@
         <td id="iteration_rejected" class="iteration rejected half"><%= iteration_rejected %></td>
       </tr>
     </table>
-    <!--</div>--><%= chart_render(charts,'b') %>
-    <div id="chart_container_c" class="chart_container"><%= chart_render(charts,'c') %></div>
+    <!--</div>--><%= Chart.render_all_in('b') %>
+    <div id="chart_container_c" class="chart_container"><%= Chart.render_all_in('c') %></div>
     
     <div id="message_centre">
     <%= Message.render_all %>

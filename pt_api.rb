@@ -148,34 +148,58 @@ module PtApi
 
       def report(task)
         # Generate report   
-        status = 0
+        @status = 0
         classes = ['good','bad']
         title = ["Stories sucesfully #{['imported','repaired'][task]}","Stories #{['imported','repaired'][task]} with errors"]
-        message = "#{@counters[:success]} out of #{@counters[:total]} stories sucesfully #{['imported','repaired'][task]}. "
-        if @counters[:parse_error] > 0
-          status = 1
-          message << "#{@counters[:parse_error]} stories suffered parser errors. Incomplete or malformed data was returned by Pivotal Tracker. "
-        end
-        if @counters[:create_error] > 0
-          status = 1
-          message << "#{@counters[:create_error]} stories could not be created. "
-        end
-        if (@counters[:success] + @counters[:parse_error] + @counters[:create_error]) < @counters[:total].to_i
-          status = 1
-          message << "Caution! The total number of stories processed does not match that reported by the API."
-        end
-        if (@id_list!='all' && @id_list.length > 0)
-          status = 1
-          message << "#{@id_list.length} stories could not be found in the Pivotal Tracker database and may have been deleted.<br/>
-          <strong>Missing stories:</strong> #{@id_list.join(',')}<br/>
-          Use the 'remove stories' function to remove these stories."
-        end
+        message = "#{@counters[:success]} out of #{@counters[:total]} stories sucesfully #{['imported','repaired'][task]}.<br/>"
+        message << parse_errors
+        message << create_errors
+        message << count_errors
+        message << missing_stories
         return {
           :id => ['database_import','database_repair'][task],
-          :classes => classes[status],
-          :title => title[status],
+          :classes => classes[@status],
+          :title => title[@status],
           :body => message
         }
+      end
+      
+      def parse_errors
+        if @counters[:parse_error] > 0
+          @status = 1
+          "#{@counters[:parse_error]} stories suffered parser errors. Incomplete or malformed data was returned by Pivotal Tracker.<br/>"
+        else
+          ''
+        end
+      end
+      
+      def create_errors
+        if @counters[:create_error] > 0
+          @status = 1
+          "#{@counters[:create_error]} stories could not be created.\n"
+        else
+          ''
+        end
+      end
+      
+      def count_errors
+        if (@counters[:success] + @counters[:parse_error] + @counters[:create_error]) < @counters[:total].to_i
+          @status = 1
+          "Caution! The total number of stories processed does not match that reported by the API.<br/>"
+        else
+          ''
+        end
+      end
+      
+      def missing_stories
+        if @id_list!='all' && @id_list.length > 0
+          @status = 1
+          "#{@id_list.length} stories could not be found in the Pivotal Tracker database and may have been deleted.<br/>
+          <strong>Missing stories:</strong> #{@id_list.join(',')}<br/>
+          Use the 'remove stories' function to remove these stories."
+        else
+          ''
+        end
       end
 
       def is_valid?
@@ -324,7 +348,7 @@ module PtApi
           :classes => 'good',
           :title => 'Stories sucesfully deleted',
           :body => "Of the #{scanned} stories tested, #{deleted.length} could not be found in the Pivitol Tracker database, and have been flagged as deleted.<br/>
-          <strong>Flagged IDs:</strong> #{deleted.join(',')}"
+          <strong>Flagged IDs:</strong> #{deleted.to_ul('deleted_list ticket_list')}"
         })
 
       end

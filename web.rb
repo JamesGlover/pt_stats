@@ -39,3 +39,31 @@ elsif $SETTINGS['proxy']
 else
   PtApi::Request::PROXY =  Net::HTTP
 end
+
+# Register the charts
+
+TimeChart.register(
+  :type => 'stacked-area',
+  :name => 'chart_iterations_time',
+  :title => 'Iteration Ticket States',
+  :iteration => Iteration.latest,
+  :location => 'c',
+  :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
+  )
+Chart.register(
+  :type => 'stacked-bar',
+  :name => 'chart_iterations2',
+  :title => 'Project Ticket States',
+  :iterations => [Iteration.all],
+  :location => 'c',
+  :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
+)
+IterationChart.register(
+  :type => 'stacked-area',
+  :name => 'chart_all_iterations_time',
+  :title => 'Ticket States History',
+  :iteration_range => (0..Iteration.latest.number),
+  :location => 'ov_a',
+  :properties => '"renderOptions": {"defaultAxisStart": 0.5}, "dataOptions": {"zeroShift" : false, "shiftAxis": true}',
+  :axis => ['Created','Started','Finished','Delivered','Accepted','Rejected']
+)

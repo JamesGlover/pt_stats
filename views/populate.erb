@@ -55,15 +55,15 @@
           "There are currently no stories with missing information. You do not need to repair the database."
         end
         %></p>
-        <%= idlist_render(invalid_stories_list) %>
+        <%= invalid_stories_list.to_ul('invalid_list ticket_list') %>
         <input type='submit' value='Repair Database' name='submit'/>
       </div>
       
       <div id='deleteContainer' class='information neutral'><h3>'Delete' Stories</h3>
         <p>The system should automatically flag stories as deleted when Pivotal Tracker generates a delete event. However, if you suspect that this hasn't occurred, you can delete tickets through this interface.</p>
         <input type='submit' value='Flag All Deleted Stories' name='submit'/>
-        <input type='text' name='del_ids' value=''/>
-        <input type='submit' value='Flag Listed Deleted Stories' name='submit'/>
+        <span class="group"><input type='text' name='del_ids' value=''/>
+        <input type='submit' value='Flag Listed Deleted Stories' name='submit'/></span>
       </div>
       
     </form>
